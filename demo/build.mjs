@@ -11,6 +11,8 @@ const must = (s, a, b) => {
   return s.replace(a, b);
 };
 
+// [도입 문의하기] → 상담 신청서 → 이 주소로 연결 (카카오톡 채널 주소를 받으면 KAKAO_CHANNEL_URL 로 지정)
+const CONSULT_URL = process.env.KAKAO_CHANNEL_URL || 'https://www.aijemu.ai.kr';
 const seed = await import(path.join(root, 'src/seed.js'));
 const { THEMES } = await import(path.join(root, 'src/slides.js'));
 const SEED = JSON.stringify({ OWNER: seed.OWNER, SECRETARY: seed.SECRETARY, EMPLOYEES: seed.EMPLOYEES, KNOWLEDGE: seed.KNOWLEDGE });
@@ -22,12 +24,12 @@ body = body.replace(/<script[^>]*src="\/app\.js"[^>]*><\/script>/, '');
 body = must(body, '<nav class="tabs" id="tabs">', `<div class="demo-banner" role="note">
     <div class="intro">
       <p class="intro-title"><b>1인 창업자를 위한 AI 직원 사무실</b> 체험판</p>
-      <p>AI 비서실장과 직원 11명이 업무를 나눠 맡고, 대표는 결재만 합니다. 전경숙 대표의 실제 사무실 구성을 예시로 보여 드립니다.</p>
+      <p>AI 비서실장과 직원 6명이 업무를 나눠 맡고, 대표는 결재만 합니다. 전경숙 대표의 실제 사무실 구성을 예시로 보여 드립니다.</p>
       <p class="tour"><span>① 아래 보라색 예시를 누르고 <b>[지시하기]</b></span><span>② <b>결재함</b>에서 승인·수정 요청</span><span>③ <b>카드뉴스·PPT</b> 만들기와 <b>주간 보고</b> 보기</span></p>
       <p class="fine">체험판에서는 AI 작성, Google·카카오톡 연결, 파일 저장이 실제로 이루어지지 않고 예시가 표시됩니다. 새로고침하면 처음 상태로 돌아갑니다.</p>
     </div>
     <div class="cta">
-      <a href="https://www.aijemu.ai.kr" target="_blank" rel="noopener" class="cta-main">도입·교육 문의</a>
+      <button type="button" class="cta-main" data-consult>도입 문의하기</button>
       <a href="https://www.gptstore2.ai.kr" target="_blank" rel="noopener" class="cta-sub">AI 강의 보기</a>
     </div>
   </div>
@@ -54,7 +56,8 @@ body { font-family: 'Noto Sans KR', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun
 .demo-banner .tour { display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .demo-banner .fine { font-size: .78rem; opacity: .85; }
 .demo-banner .cta { display: flex; gap: 8px; flex-wrap: wrap; }
-.demo-banner .cta a { text-decoration: none; font-weight: 700; padding: 9px 16px; border-radius: 10px; white-space: nowrap; }
+.demo-banner .cta a, .demo-banner .cta button { text-decoration: none; font: inherit; font-weight: 700; padding: 9px 16px; border-radius: 10px; white-space: nowrap; cursor: pointer; }
+.demo-banner .cta button { border: 0; }
 .demo-banner .cta-main { background: var(--accent); color: #fff; }
 .demo-banner .cta-sub { border: 1px solid var(--banner-fg); color: var(--banner-fg); }
 .badge.demo { background: var(--banner-bg); color: var(--banner-fg); }
@@ -81,6 +84,64 @@ const mock = read('demo/mock.js').replace('__SEED__', SEED).replace('__THEMES__'
 // 보기 화면에서는 alert/confirm 창이 뜨지 않으므로 토스트와 '예'로 대체
 const shim = `window.alert = (m) => window.__demoToast ? window.__demoToast(m) : console.log(m);\nwindow.confirm = () => true;`;
 
+const consultHtml = `
+<dialog id="consultModal" aria-labelledby="consultTitle">
+  <div class="consult">
+    <form id="consultForm" class="stack" novalidate>
+      <h2 id="consultTitle">🏢 AI 직원 사무실 도입 상담 신청</h2>
+      <p class="muted">1인 창업자·설계사·강사를 위한 AI 직원 사무실 도입과 교육을 상담해 드립니다. 아래를 작성하시면 상담 신청서가 만들어집니다.</p>
+      <label for="cName">이름 <b class="req">*</b></label>
+      <input id="cName" name="name" autocomplete="name" placeholder="홍길동" />
+      <label for="cContact">연락처 <b class="req">*</b></label>
+      <input id="cContact" name="contact" autocomplete="tel" placeholder="010-0000-0000 또는 이메일" />
+      <fieldset class="interests">
+        <legend>관심 분야 <b class="req">*</b></legend>
+        <label><input type="checkbox" name="interest" value="AI 직원 사무실 도입" checked /> AI 직원 사무실 도입</label>
+        <label><input type="checkbox" name="interest" value="AI 활용 강의·교육" /> AI 활용 강의·교육</label>
+        <label><input type="checkbox" name="interest" value="AI 자격증 과정" /> AI 자격증 과정</label>
+        <label><input type="checkbox" name="interest" value="재무·은퇴 설계 상담" /> 재무·은퇴 설계 상담</label>
+        <label><input type="checkbox" name="interest" value="기관·기업 단체 교육" /> 기관·기업 단체 교육</label>
+      </fieldset>
+      <label for="cBiz">하시는 일 (선택)</label>
+      <input id="cBiz" name="biz" placeholder="예: 보험설계사, 1인 강사, 소상공인" />
+      <label for="cTime">희망 상담 시간 (선택)</label>
+      <input id="cTime" name="time" placeholder="예: 평일 오후, 화요일 저녁" />
+      <label for="cMemo">문의 내용 (선택)</label>
+      <textarea id="cMemo" name="memo" rows="3" placeholder="궁금한 점을 자유롭게 적어 주세요"></textarea>
+      <label class="agree"><input type="checkbox" name="agree" /> 상담을 위한 개인정보(이름·연락처) 수집·이용에 동의합니다. 상담 후 목적이 끝나면 파기합니다.</label>
+      <p id="consultErr" class="err" role="alert"></p>
+      <div class="actions"><button type="submit" class="primary">신청서 만들기</button><button type="button" data-consult-close>닫기</button></div>
+    </form>
+    <div id="consultDone" class="stack" hidden>
+      <h2>✅ 신청서가 준비되었습니다</h2>
+      <p id="consultHow"></p>
+      <textarea id="consultMsg" rows="8" readonly></textarea>
+      <div class="actions">
+        <button type="button" class="primary" id="consultCopy">① 신청서 복사</button>
+        <a id="consultGo" class="btn-link" target="_blank" rel="noopener">② 카카오톡 채널 열기</a>
+      </div>
+      <p id="consultCopied" class="muted" role="status"></p>
+      <p class="muted fine-print">입력하신 내용은 이 화면에만 있고 따로 저장되지 않습니다.</p>
+      <div class="actions"><button type="button" id="consultBack">← 다시 고치기</button><button type="button" data-consult-close>닫기</button></div>
+    </div>
+  </div>
+</dialog>`;
+css += `
+#consultModal { border: 0; border-radius: var(--radius); padding: 0; width: min(560px, 94vw); background: var(--card); color: var(--text); }
+#consultModal::backdrop { background: rgba(0,0,0,.45); }
+.consult { padding: 20px; max-height: 88vh; overflow: auto; }
+.consult label { color: var(--text); font-size: .88rem; }
+.consult .req { color: var(--bad); }
+.consult .interests { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 4px 12px; }
+.consult .interests legend { font-size: .88rem; padding: 0 4px; }
+.consult .interests label, .consult .agree { display: flex; gap: 6px; align-items: flex-start; }
+.consult input[type=checkbox] { width: auto; margin-top: 4px; }
+.consult .agree { font-size: .8rem; color: var(--muted); }
+.consult .fine-print { font-size: .78rem; }
+#consultMsg { font-size: .88rem; }
+`;
+const consultJs = read('demo/consult.js').replace('__CONSULT_URL__', JSON.stringify(CONSULT_URL));
+
 const out = `<title>나의 AI 사무실</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -89,12 +150,16 @@ const out = `<title>나의 AI 사무실</title>
 ${css}
 </style>
 ${body}
+${consultHtml}
 <script>
 ${shim}
 ${mock}
 </script>
 <script type="module">
 ${js}
+</script>
+<script>
+${consultJs}
 </script>
 `;
 const dest = path.join(root, 'demo/ai-office-demo.html');

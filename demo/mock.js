@@ -203,7 +203,7 @@
   const generic = (t, e) => `# ${t.title}\n\n**담당:** ${e.emoji} ${e.name} (${e.role})\n\n${t.instructions}\n\n- (체험판 예시 결과물입니다. 실제 앱에서는 이 직원이 지시에 맞춰 직접 작성합니다.)`;
   const resultFor = (t) => {
     const e = db.employees.find((x) => x.id === t.employeeId) || { name: '', role: '', emoji: '' };
-    let body = (SAMPLE[t.employeeId] || (() => generic(t, e)))(t.orderText);
+    let body = (SAMPLE[t.sampleKey || t.employeeId] || (() => generic(t, e)))(t.orderText);
     if (t.history.length) body = `> ✏️ 수정 반영 (${t.history.length}차): ${t.history.at(-1).feedback}\n\n${body}`;
     return `> 🧪 체험판 예시 결과물입니다. 실제 앱에서는 AI 직원이 지시 내용에 맞춰 직접 작성합니다.\n\n${body}`;
   };
@@ -227,8 +227,8 @@
     // assigns: [직원, 제목, 상태]
     const o = { id: uid('o'), text, summary, status: 'assigned', createdAt: ago(minAgo) };
     db.orders.unshift(o);
-    for (const [employeeId, title, status] of assigns) {
-      const t = { id: uid('t'), orderId: o.id, orderText: text, employeeId, title, instructions: `${title}: 대표 지시에 맞춰 초안 작성`, status, result: '', history: [], error: null, createdAt: ago(minAgo), updatedAt: ago(minAgo - 3) };
+    for (const [employeeId, title, status, sampleKey] of assigns) {
+      const t = { id: uid('t'), orderId: o.id, orderText: text, employeeId, title, instructions: `${title}: 대표 지시에 맞춰 초안 작성`, status, result: '', history: [], error: null, createdAt: ago(minAgo), updatedAt: ago(minAgo - 3), sampleKey };
       t.result = resultFor(t);
       if (status === 'done') t.approvedAt = ago(minAgo - 5);
       db.tasks.unshift(t);
@@ -236,21 +236,21 @@
   };
   // 지난 며칠간 처리한 업무 (주간 보고서 예시용)
   [
-    [6, 'sns', '블로그 글: 연금 3층 구조'], [6, 'exam-writer', 'AI 자격증 예상문제 20개'], [5, 'proposal', '아산시 평생학습관 강의 제안서'],
-    [5, 'crm', '11월 생일 고객 축하 문자'], [4, 'lecture-planner', '컬러테라피 특강 교안'], [3, 'web', 'gptstore2 수강 신청 공지'],
-    [3, 'writer', '칼럼: 돈 이야기는 마음 이야기'], [2, 'fin-analyst', '박OO 고객 보장 분석 요약'], [1, 'face-counsel', '상담 리포트 양식'],
+    [6, 'sns', '블로그 글: 연금 3층 구조'], [6, 'exam-writer', 'AI 자격증 예상문제 20개'], [5, 'sns', '아산시 평생학습관 강의 제안서', 'proposal'],
+    [5, 'fin-analyst', '11월 생일 고객 축하 문자', 'crm'], [4, 'lecture-planner', '컬러테라피 특강 교안'], [3, 'web', 'gptstore2 수강 신청 공지'],
+    [3, 'writer', '칼럼: 돈 이야기는 마음 이야기'], [2, 'fin-analyst', '박OO 고객 보장 분석 요약'], [1, 'writer', '상담 리포트 양식', 'face-counsel'],
     [1, 'sns', '유튜브 쇼츠 대본 3편'],
-  ].forEach(([days, emp, title]) => addOrder(title + ' 해 줘', `${title} 업무를 배정했습니다.`, days * 1440 + 120, [[emp, title, 'done']]));
-  db.tasks.find((t) => t.employeeId === 'proposal').history.push({ feedback: '비용 항목을 표로 정리해 줘', result: '', at: ago(5 * 1440) });
-  addOrder('충남AIXR 이사회 회의 안내 공문 써 줘', '협회 사무국장 보람에게 공문 작성을 배정했습니다.', 180, [['association', '이사회 안내 공문', 'done']]);
+  ].forEach(([days, emp, title, sampleKey]) => addOrder(title + ' 해 줘', `${title} 업무를 배정했습니다.`, days * 1440 + 120, [[emp, title, 'done', sampleKey]]));
+  db.tasks.find((t) => t.sampleKey === 'proposal').history.push({ feedback: '비용 항목을 표로 정리해 줘', result: '', at: ago(5 * 1440) });
+  addOrder('충남AIXR 이사회 회의 안내 공문 써 줘', '사이트·협회 운영 담당 한결에게 공문 작성을 배정했습니다.', 180, [['web', '이사회 안내 공문', 'done', 'association']]);
   addOrder(
     '이번 달 은퇴설계 세미나 열자. 커리큘럼, 홍보글, 기존 고객 초대 문자 준비해 줘',
-    '세미나 준비를 4개 업무로 나눠 지우, 리아, 하나, 재희에게 배정했습니다.',
+    '세미나 준비를 4개 업무로 나눠 지우, 리아, 재희에게 배정했습니다.',
     40,
     [
       ['lecture-planner', '세미나 커리큘럼', 'review'],
       ['sns', '세미나 홍보글', 'review'],
-      ['crm', '고객 초대 문자 3안', 'review'],
+      ['fin-analyst', '고객 초대 문자 3안', 'review', 'crm'],
       ['fin-analyst', '은퇴자금 예시 계산표', 'done'],
     ],
   );
@@ -304,7 +304,7 @@
       .sort((a, b) => b.s - a.s)
       .slice(0, 4)
       .map((x) => x.e);
-    return scored.length ? scored : [db.employees.find((e) => e.id === 'proposal') || db.employees[0]];
+    return scored.length ? scored : [db.employees.find((e) => e.id === 'sns') || db.employees[0]];
   };
 
   const fail = (status, message) => Object.assign(new Error(message), { status });
@@ -349,7 +349,7 @@
           '- 강의·홍보·고객관리가 고르게 진행되어 세미나 준비가 순조롭습니다.',
           '',
           '**다음 주 제안**',
-          '- 제안서 작성자 도윤에게 수정 요청이 있었어요. 업무 지침서에 "비용은 표로 정리"를 추가해 보세요.',
+          '- 리아(마케팅·제안서)에게 제안서 수정 요청이 있었어요. 업무 지침서에 "비용은 표로 정리"를 추가해 보세요.',
           `- 결재 대기 ${r.totals.review}건을 월요일 오전에 먼저 처리하시면 홍보 일정이 앞당겨집니다.`,
           '',
           '*(체험판 예시 총평입니다)*',
