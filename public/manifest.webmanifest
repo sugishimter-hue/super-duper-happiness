@@ -1,0 +1,15 @@
+{
+  "name": "나의 AI 사무실",
+  "short_name": "AI 사무실",
+  "description": "AI 직원에게 업무를 지시하고 결재하는 1인 창업자의 사무실",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f4f1",
+  "theme_color": "#8a5cf6",
+  "lang": "ko",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

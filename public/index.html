@@ -6,6 +6,11 @@
   <title>나의 AI 사무실</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>" />
   <link rel="stylesheet" href="/style.css" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <meta name="theme-color" content="#8a5cf6" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="AI 사무실" />
 </head>
 <body>
   <!-- 로그인 / 처음 비밀번호 설정 -->
@@ -16,6 +21,7 @@
       <p id="authDesc" class="muted"></p>
       <input id="authPw" type="password" autocomplete="current-password" placeholder="비밀번호" />
       <input id="authPw2" type="password" autocomplete="new-password" placeholder="비밀번호 한 번 더" class="hidden" />
+      <input id="authCode" type="text" autocomplete="off" placeholder="설정 코드 (Render의 SETUP_CODE)" class="hidden" />
       <p id="authErr" class="err"></p>
       <button class="primary" type="submit" id="authBtn">로그인</button>
     </form>

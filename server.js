@@ -3,6 +3,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { timingSafeEqual } from 'node:crypto';
 
 try {
   process.loadEnvFile(); // .env 파일이 있으면 읽기
@@ -27,8 +28,25 @@ if (process.argv.includes('--reset-password')) {
 
 const PORT = Number(process.env.PORT) || 3000;
 const SECURE = google.appUrl().startsWith('https://');
+// 인터넷에 공개된 상태에서 처음 비밀번호를 정할 때 필요한 설정 코드 (다른 사람이 먼저 차지하지 못하게)
+const SETUP_CODE = (process.env.SETUP_CODE || '').trim();
+const setupCodeRequired = () => auth.needsSetup() && (Boolean(SETUP_CODE) || SECURE);
+
+// 접속한 사람의 IP (Render 같은 배포 환경에서는 프록시가 붙여 준 마지막 주소를 사용)
+function clientIp(req) {
+  if (process.env.TRUST_PROXY === '1') {
+    const xff = String(req.headers['x-forwarded-for'] || '').split(',').map((s) => s.trim()).filter(Boolean);
+    if (xff.length) return xff[xff.length - 1];
+  }
+  return req.socket.remoteAddress;
+}
+function sameText(a, b) {
+  const x = Buffer.from(String(a));
+  const y = Buffer.from(String(b));
+  return x.length === y.length && timingSafeEqual(x, y);
+}
 const PUBLIC = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public');
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
 
 const ctx = (extra = {}) => ({ owner: db.owner, employees: db.employees, knowledge: db.knowledge, tasks: db.tasks, ...extra });
 
@@ -141,10 +159,19 @@ const text = (v, field, max = 20000) => {
 };
 
 // ── 로그인 ──
-route('GET', '/api/auth/status', (_b, _p, req) => ({ needsSetup: auth.needsSetup(), loggedIn: auth.isLoggedIn(req) }), { public: true });
+route('GET', '/api/auth/status', (_b, _p, req) => ({ needsSetup: auth.needsSetup(), setupCodeRequired: setupCodeRequired(), loggedIn: auth.isLoggedIn(req) }), { public: true });
 
-route('POST', '/api/auth/setup', (body, _p, _req, res) => {
+route('POST', '/api/auth/setup', (body, _p, req, res) => {
   if (!auth.needsSetup()) throw fail(409, '이미 비밀번호가 설정되어 있습니다.');
+  if (setupCodeRequired()) {
+    const ip = clientIp(req);
+    if (auth.loginBlocked(ip)) throw fail(429, '여러 번 틀렸습니다. 15분 뒤에 다시 시도해 주세요.');
+    if (!SETUP_CODE) throw fail(403, '인터넷에 공개된 상태에서는 설정 코드가 필요합니다. 서버 환경변수 SETUP_CODE 를 정한 뒤 다시 시도해 주세요.');
+    if (!sameText(String(body.code || '').trim(), SETUP_CODE)) {
+      auth.recordFail(ip);
+      throw fail(401, '설정 코드가 맞지 않습니다. Render의 Environment 화면에서 SETUP_CODE 값을 확인해 주세요.');
+    }
+  }
   const err = auth.validateNewPassword(body.password);
   if (err) throw fail(400, err);
   auth.setPassword(body.password);
@@ -153,7 +180,7 @@ route('POST', '/api/auth/setup', (body, _p, _req, res) => {
 }, { public: true });
 
 route('POST', '/api/auth/login', (body, _p, req, res) => {
-  const ip = req.socket.remoteAddress;
+  const ip = clientIp(req);
   if (auth.loginBlocked(ip)) throw fail(429, '비밀번호를 여러 번 틀렸습니다. 15분 뒤에 다시 시도해 주세요.');
   if (!auth.checkPassword(body.password)) {
     auth.recordFail(ip);
@@ -596,11 +623,17 @@ const SECURITY_HEADERS = {
   'x-content-type-options': 'nosniff',
   'x-frame-options': 'DENY',
   'referrer-policy': 'same-origin',
+  'content-security-policy':
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self' data:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+  ...(SECURE ? { 'strict-transport-security': 'max-age=31536000' } : {}),
 };
 
 const server = http.createServer(async (req, res) => {
   for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.setHeader(k, v);
   const url = new URL(req.url, 'http://localhost');
+
+  // 배포 서비스가 "살아 있나" 확인하는 주소
+  if (url.pathname === '/healthz') return res.writeHead(200, { 'content-type': 'text/plain' }).end('ok');
 
   if (url.pathname === '/auth/kakao/start' || url.pathname === '/auth/kakao/callback') {
     return handleKakaoAuth(url, req, res).catch((err) => {

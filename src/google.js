@@ -22,7 +22,8 @@ const g = (url) => {
 
 const clientId = () => process.env.GOOGLE_CLIENT_ID;
 const clientSecret = () => process.env.GOOGLE_CLIENT_SECRET;
-export const appUrl = () => (process.env.APP_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/$/, '');
+// 인터넷 배포 시: APP_URL(직접 지정) → RENDER_EXTERNAL_URL(Render가 자동으로 넣어 줌) → 내 PC 주소
+export const appUrl = () => (process.env.APP_URL || process.env.RENDER_EXTERNAL_URL || `http://localhost:${process.env.PORT || 3000}`).replace(/\/$/, '');
 const redirectUri = () => `${appUrl()}/auth/google/callback`;
 
 export const configured = () => Boolean(clientId() && clientSecret());

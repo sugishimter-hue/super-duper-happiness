@@ -1,0 +1,35 @@
+# Render 배포 설정 (Blueprint). README의 "인터넷 배포" 참고
+services:
+  - type: web
+    name: ai-office
+    runtime: node
+    plan: starter            # 항상 켜져 있어야 자동 브리핑·카톡 알림이 동작합니다 (무료 플랜은 잠들어서 안 됨)
+    region: singapore        # 한국과 가장 가까운 지역
+    branch: claude/relaxed-newton-05x92d   # 지금 코드가 있는 브랜치 (나중에 main 으로 합치면 main 으로 바꾸세요)
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    disk:                    # 업무·설정 데이터를 보관하는 저장 공간 (재배포해도 유지)
+      name: ai-office-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATA_DIR
+        value: /var/data
+      - key: TRUST_PROXY
+        value: "1"
+      - key: SETUP_CODE        # 처음 비밀번호를 정할 때 필요한 코드 (자동 생성)
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: KAKAO_REST_API_KEY
+        sync: false
+      - key: KAKAO_CLIENT_SECRET
+        sync: false

@@ -272,12 +272,15 @@ function directOrder(id) {
 // ───────── 로그인 ─────────
 let loggedIn = false;
 let authMode = 'login';
-function showAuth(setup) {
+let needCode = false;
+function showAuth(setup, codeRequired = false) {
   loggedIn = false;
+  needCode = setup && codeRequired;
+  $('#authCode').classList.toggle('hidden', !needCode);
   authMode = setup ? 'setup' : 'login';
   $('#authScreen').classList.remove('hidden');
   $('#authTitle').textContent = setup ? '처음 오셨네요! 비밀번호를 정해 주세요' : '나의 AI 사무실';
-  $('#authDesc').textContent = setup ? '이 비밀번호로 대표님만 사무실에 들어올 수 있습니다. (8자 이상)' : '대표님 비밀번호를 입력해 주세요.';
+  $('#authDesc').textContent = setup ? `이 비밀번호로 대표님만 사무실에 들어올 수 있습니다. (8자 이상)${needCode ? ' 인터넷에 공개된 사무실이라 처음 한 번 설정 코드가 필요합니다.' : ''}` : '대표님 비밀번호를 입력해 주세요.';
   $('#authPw2').classList.toggle('hidden', !setup);
   $('#authPw').autocomplete = setup ? 'new-password' : 'current-password';
   $('#authBtn').textContent = setup ? '시작하기' : '로그인';
@@ -287,7 +290,7 @@ function showAuth(setup) {
 async function enter() {
   loggedIn = true;
   $('#authScreen').classList.add('hidden');
-  $('#authPw').value = $('#authPw2').value = '';
+  $('#authPw').value = $('#authPw2').value = $('#authCode').value = '';
   for (const k of Object.keys(lastSig)) delete lastSig[k];
   await refresh();
 }
@@ -297,7 +300,7 @@ $('#authForm').onsubmit = async (ev) => {
   if (authMode === 'setup' && pw !== $('#authPw2').value) return ($('#authErr').textContent = '두 비밀번호가 서로 다릅니다.');
   $('#authBtn').disabled = true;
   try {
-    await api('POST', authMode === 'setup' ? '/api/auth/setup' : '/api/auth/login', { password: pw });
+    await api('POST', authMode === 'setup' ? '/api/auth/setup' : '/api/auth/login', { password: pw, code: $('#authCode').value });
     await enter();
   } catch (e) {
     $('#authErr').textContent = e.message;
@@ -721,7 +724,7 @@ if (gq.has('google') || gq.has('kakao')) document.querySelector('#tabs [data-vie
 (async () => {
   const st = await api('GET', '/api/auth/status');
   if (st.loggedIn) enter();
-  else showAuth(st.needsSetup);
+  else showAuth(st.needsSetup, st.setupCodeRequired);
 })();
 setInterval(() => { if (!document.hidden) refresh(); }, 3000);
 setInterval(() => { if (!document.hidden && S?.google.connected) loadCalendar(); }, 5 * 60 * 1000);

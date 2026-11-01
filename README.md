@@ -146,6 +146,57 @@ Google 캘린더·Gmail·Drive를 쓰려면 대표님 전용 "Google 연결 열�
 
 > 💡 알림 속 [사무실 열기] 버튼은 앱이 켜진 **그 컴퓨터에서만** 열립니다. 휴대폰에서 바로 열려면 앱을 인터넷에 배포해야 합니다. 그때는 위 주소들을 `https://내주소`로 바꿔 등록하세요.
 
+## 🌐 인터넷 배포 (휴대폰에서도 접속하기)
+
+[Render](https://render.com)에 올리면 `https://ai-office-xxxx.onrender.com` 같은 주소가 생깁니다. 휴대폰과 다른 컴퓨터에서도 접속할 수 있고, 내 컴퓨터를 꺼 두어도 아침 브리핑과 카톡 알림이 동작합니다. 배포 설정은 저장소의 `render.yaml`에 모두 들어 있습니다.
+
+**예상 비용 (매월)**
+
+| 항목 | 금액 |
+|---|---|
+| Render Starter (항상 켜짐) | $7 |
+| 저장 공간 1GB | 약 $0.25 |
+| Claude API | 쓴 만큼 별도 |
+
+> 무료 플랜은 15분간 접속이 없으면 잠들어서 자동 브리핑·알림이 동작하지 않고, 저장 공간도 붙일 수 없어 데이터가 지워집니다. 그래서 Starter로 설정해 두었습니다.
+
+### 1) Render에 올리기 (약 10분)
+1. [render.com](https://render.com) → **Get Started** → **GitHub로 가입**
+2. 대시보드 오른쪽 위 **New + → Blueprint**
+3. **Connect GitHub**에서 `super-duper-happiness` 저장소 접근을 허용하고 선택합니다.
+4. Render가 `render.yaml`을 읽어 **ai-office** 서비스를 보여 줍니다. 입력칸이 나오면:
+   - `ANTHROPIC_API_KEY`: Claude API 키 입력
+   - Google·카카오 키: 이미 있으면 입력하고, 없으면 비워 두었다가 나중에 넣어도 됩니다.
+5. **Apply**를 누르고 결제 카드를 등록합니다. 배포는 5분 정도 걸리고, 상태가 **Live**가 되면 완료입니다.
+
+### 2) 처음 접속해서 비밀번호 정하기
+1. Render의 ai-office 화면 위쪽에 있는 주소(`https://….onrender.com`)를 엽니다.
+2. Render의 **Environment** 메뉴에서 `SETUP_CODE` 값을 복사합니다. 자동으로 만들어진 코드입니다.
+3. 사이트에서 비밀번호(8자 이상)를 두 번 입력하고, **설정 코드**에 복사한 값을 붙여 넣습니다.
+
+> 🔐 설정 코드가 필요한 이유: 인터넷에 공개된 주소라서, 대표님보다 먼저 다른 사람이 들어와 비밀번호를 정하는 일을 막기 위해서입니다. 비밀번호를 정한 뒤에는 더 이상 쓰지 않습니다.
+
+### 3) Google·카카오 주소 추가 (연동을 쓰는 경우)
+배포 주소가 `https://ai-office-xxxx.onrender.com`이라면:
+- **Google Cloud 콘솔** → 사용자 인증 정보 → OAuth 클라이언트 → **승인된 리디렉션 URI**에 `https://ai-office-xxxx.onrender.com/auth/google/callback` **추가**
+- **카카오 개발자 콘솔**
+  - **플랫폼 → Web** 사이트 도메인에 `https://ai-office-xxxx.onrender.com` **추가**
+  - **카카오 로그인 → Redirect URI**에 `https://ai-office-xxxx.onrender.com/auth/kakao/callback` **추가**
+- 내 PC용 `localhost` 주소는 지우지 않아도 됩니다. 둘 다 쓸 수 있습니다.
+- 키를 나중에 넣는 경우: Render **Environment**에 값을 넣고 **Save Changes**를 누르면 자동으로 다시 시작됩니다.
+
+### 4) 휴대폰 홈 화면에 앱처럼 추가
+- **아이폰**: Safari로 주소 열기 → 공유 버튼 → **홈 화면에 추가**
+- **안드로이드**: Chrome으로 주소 열기 → ⋮ 메뉴 → **홈 화면에 추가**
+
+보라색 사무실 아이콘이 생기고, 카톡 알림의 [사무실 열기] 버튼도 휴대폰에서 바로 열립니다.
+
+### 알아 두면 좋은 것
+- **업데이트**: 이 브랜치에 새 코드가 올라가면 Render가 자동으로 다시 배포합니다. 데이터(업무, 설정, 연결 정보)는 저장 공간(`/var/data`)에 있어 그대로 남습니다.
+- **백업**: Render는 저장 공간을 매일 자동으로 스냅숏(백업)합니다. Disks 메뉴에서 복원할 수 있습니다.
+- **내 도메인 연결**(예: `office.aijemu.ai.kr`): Render **Settings → Custom Domains**에서 추가하고, 도메인 업체에 CNAME을 등록합니다. 연결한 뒤에는 Environment에 `APP_URL=https://office.aijemu.ai.kr`를 넣고, Google·카카오에도 새 주소를 추가하세요.
+- **비밀번호를 잊었을 때**: Render **Shell** 메뉴에서 `npm run reset-password`를 실행하고 **Manual Deploy → Restart**를 누릅니다. 그러면 다시 설정 코드로 비밀번호를 정할 수 있습니다.
+
 ## 데이터와 보안
 
 - 업무·직원·지식창고·설정은 `data/db.json`에 저장됩니다. Git에는 올라가지 않습니다.
@@ -153,7 +204,9 @@ Google 캘린더·Gmail·Drive를 쓰려면 대표님 전용 "Google 연결 열�
 - Google 연결 정보(갱신 토큰)도 `data/db.json`에 들어 있으니 이 파일은 다른 사람과 공유하지 마세요.
 - API 키는 서버(`.env`)에만 있고 브라우저로는 전달되지 않습니다.
 - 고객 주민번호, 계좌번호 같은 민감정보는 지시문이나 지식창고에 넣지 마세요.
-- 인터넷에 공개 배포할 때는 반드시 **https 주소**로 배포하고, `.env`의 `APP_URL`을 그 주소로, Google 리디렉션 URI도 `https://내주소/auth/google/callback`으로 바꾸세요.
+- 인터넷 배포 시에는 처음 비밀번호를 정할 때 **설정 코드(SETUP_CODE)**가 있어야 합니다.
+- https 주소에서는 로그인 쿠키에 **Secure** 설정과 HSTS가 적용됩니다.
+- 외부 스크립트 실행을 막는 보안 정책(CSP)과 다른 사이트 요청 차단(CSRF 방지)이 들어 있습니다.
 
 ## 파일 구성
 
@@ -165,6 +218,8 @@ src/google.js      Google 캘린더·Gmail·Drive 연동
 src/kakao.js       카카오톡 "나에게 보내기" 알림
 src/slides.js      PPT·카드뉴스 파일 만들기 (pptxgenjs)
 demo/              설치 없는 체험판 만들기
+render.yaml        Render 인터넷 배포 설정
+public/manifest.webmanifest, icon-*.png   휴대폰 홈 화면 아이콘
 src/seed.js        기본 직원·대표 정보·지식창고 (여기서 직원 기본값 수정)
 src/store.js       JSON 파일 저장소
 public/            화면 (index.html, app.js, style.css)
