@@ -219,7 +219,7 @@
     settings: { autoBriefing: true, briefingTime: '08:00', notifyReview: true, notifyBriefing: true, notifyWeekly: true, minutesPerTask: 40, slideTheme: 'lavender' },
     kakao: { configured: true, connected: true, nickname: '전경숙', redirectUri: 'http://localhost:3000/auth/kakao/callback', lastError: null },
     weeklyReviews: {},
-    google: { configured: true, connected: true, email: 'sugishimter@gmail.com', redirectUri: '' },
+    google: { configured: true, connected: true, email: 'example@gmail.com', redirectUri: '' },
     loggedIn: true,
     password: null,
   };
@@ -493,7 +493,7 @@
       Object.assign(db.kakao, { connected: true, nickname: '전경숙' });
       window.__demoToast?.('✅ (체험판) 카카오톡을 연결했습니다');
     } else {
-      Object.assign(db.google, { connected: true, email: 'sugishimter@gmail.com' });
+      Object.assign(db.google, { connected: true, email: 'example@gmail.com' });
       window.__demoToast?.('✅ (체험판) Google 계정을 연결했습니다');
     }
   }, true);
