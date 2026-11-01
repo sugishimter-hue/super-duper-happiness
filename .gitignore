@@ -2,3 +2,4 @@ node_modules/
 data/
 .env
 demo/ai-office-demo.html
+office/my-office.html
