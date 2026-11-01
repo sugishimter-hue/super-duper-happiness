@@ -15,6 +15,10 @@ function fresh() {
     orders: [],
     tasks: [],
     briefing: null,
+    settings: { autoBriefing: true, briefingTime: '08:00' },
+    auth: null, // { passwordHash }
+    sessions: [],
+    google: null, // { refreshToken, email, scopes, connectedAt, folderId }
   };
 }
 

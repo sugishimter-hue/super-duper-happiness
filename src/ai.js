@@ -150,10 +150,13 @@ export async function makeBriefing(ctx) {
     .map((t) => `- [${t.status}] ${t.title} (담당 ${nameOf(t.employeeId)})`)
     .join('\n');
 
+  const calendar = ctx.calendar; // null 이면 캘린더 미연결
+
   if (DEMO) {
     return [
       `☀️ 좋은 아침입니다, ${ctx.owner.name} 대표님!`,
       '',
+      ...(calendar !== null ? ['📅 오늘·내일 일정', calendar, ''] : []),
       `• 결재 대기 ${count('review')}건 · 작업 중 ${count('working')}건 · 완료 ${count('done')}건`,
       count('review') ? '• 결재함에 확인하실 결과물이 있습니다. 먼저 살펴봐 주세요.' : '• 지금 결재할 건은 없습니다. 오늘 맡기실 일을 지시해 주세요.',
       '',
@@ -169,8 +172,11 @@ export async function makeBriefing(ctx) {
         role: 'user',
         content:
           `오늘은 ${today}입니다. 아래 업무 현황으로 아침 브리핑을 써 주세요. ` +
-          `구성: 인사 한 줄 → 현황 숫자 → 오늘 꼭 처리할 3가지(결재 대기 우선) → 대표님께 드리는 제안 1가지. 10줄 이내.\n\n` +
-          `결재대기 ${count('review')} / 작업중 ${count('working')} / 완료 ${count('done')} / 오류 ${count('error')}\n${lines || '(진행 중인 업무 없음)'}`,
+          (calendar !== null
+            ? `구성: 인사 한 줄 → 오늘 일정 요약(시간순, 준비할 것이 있으면 한마디) → 업무 현황 숫자 → 오늘 꼭 처리할 3가지(일정과 결재 대기를 함께 고려) → 대표님께 드리는 제안 1가지. 14줄 이내.\n\n` +
+              `[Google 캘린더 오늘·내일 일정]\n${calendar}\n\n`
+            : `구성: 인사 한 줄 → 현황 숫자 → 오늘 꼭 처리할 3가지(결재 대기 우선) → 대표님께 드리는 제안 1가지. 10줄 이내.\n\n`) +
+          `[업무 현황]\n결재대기 ${count('review')} / 작업중 ${count('working')} / 완료 ${count('done')} / 오류 ${count('error')}\n${lines || '(진행 중인 업무 없음)'}`,
       },
     ],
     effort: 'low',

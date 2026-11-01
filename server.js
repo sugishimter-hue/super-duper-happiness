@@ -10,13 +10,25 @@ try {
 
 const { db, save, uid, now } = await import('./src/store.js');
 const ai = await import('./src/ai.js');
+const auth = await import('./src/auth.js');
+const google = await import('./src/google.js');
 const { SECRETARY } = await import('./src/seed.js');
 
+// 비밀번호를 잊었을 때: npm run reset-password
+if (process.argv.includes('--reset-password')) {
+  db.auth = null;
+  db.sessions = [];
+  save();
+  console.log('🔑 비밀번호를 초기화했습니다. 앱을 다시 켜고 브라우저에서 새 비밀번호를 정해 주세요.');
+  process.exit(0);
+}
+
 const PORT = Number(process.env.PORT) || 3000;
+const SECURE = google.appUrl().startsWith('https://');
 const PUBLIC = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml' };
 
-const ctx = () => ({ owner: db.owner, employees: db.employees, knowledge: db.knowledge, tasks: db.tasks });
+const ctx = (extra = {}) => ({ owner: db.owner, employees: db.employees, knowledge: db.knowledge, tasks: db.tasks, ...extra });
 
 // ───────────── 업무 실행 (백그라운드) ─────────────
 async function runTask(task) {
@@ -66,9 +78,56 @@ async function processOrder(order) {
   }
 }
 
+// ───────────── 브리핑 (수동 + 매일 자동) ─────────────
+let briefingRunning = null;
+function makeBriefing(kind) {
+  if (briefingRunning) return briefingRunning;
+  briefingRunning = (async () => {
+    let calendar = null;
+    let calendarError = null;
+    if (google.connected()) {
+      try {
+        calendar = google.eventsText(await google.upcomingEvents({ fresh: true }));
+      } catch (err) {
+        calendarError = err.message;
+      }
+    }
+    const text = await ai.makeBriefing(ctx({ calendar }));
+    db.briefing = { text: calendarError ? `${text}\n\n> ⚠️ 캘린더를 읽지 못했습니다: ${calendarError}` : text, at: now(), kind, date: google.seoulDate(0) };
+    save();
+    return db.briefing;
+  })().finally(() => (briefingRunning = null));
+  return briefingRunning;
+}
+
+function seoulHHMM() {
+  return new Intl.DateTimeFormat('en-GB', { timeZone: google.TZ, hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date());
+}
+
+let autoFailedDate = null;
+async function briefingTick() {
+  const s = db.settings;
+  if (!s?.autoBriefing || briefingRunning) return;
+  const today = google.seoulDate(0);
+  if (db.autoBriefingDate === today) return; // 오늘 자동 브리핑 이미 완료
+  if (autoFailedDate === today) return; // 오늘 실패했으면 반복 시도하지 않음 (요금 낭비 방지)
+  if (seoulHHMM() < s.briefingTime) return;
+  try {
+    await makeBriefing('auto');
+    db.autoBriefingDate = today;
+    save();
+    console.log(`☀️  ${today} 아침 브리핑을 자동으로 만들었습니다.`);
+  } catch (err) {
+    autoFailedDate = today;
+    console.error('자동 브리핑 실패:', err.message);
+  }
+}
+
 // ───────────── 라우팅 ─────────────
 const routes = [];
-const route = (method, pattern, handler) => routes.push({ method, re: new RegExp(`^${pattern.replace(/:\w+/g, '([^/]+)')}$`), handler });
+// opts.public: 로그인 없이 접근 가능
+const route = (method, pattern, handler, opts = {}) =>
+  routes.push({ method, re: new RegExp(`^${pattern.replace(/:\w+/g, '([^/]+)')}$`), handler, ...opts });
 const fail = (status, message) => Object.assign(new Error(message), { status });
 const findTask = (id) => db.tasks.find((t) => t.id === id) ?? (() => { throw fail(404, '업무를 찾을 수 없습니다.'); })();
 const text = (v, field, max = 20000) => {
@@ -76,6 +135,46 @@ const text = (v, field, max = 20000) => {
   return v.trim().slice(0, max);
 };
 
+// ── 로그인 ──
+route('GET', '/api/auth/status', (_b, _p, req) => ({ needsSetup: auth.needsSetup(), loggedIn: auth.isLoggedIn(req) }), { public: true });
+
+route('POST', '/api/auth/setup', (body, _p, _req, res) => {
+  if (!auth.needsSetup()) throw fail(409, '이미 비밀번호가 설정되어 있습니다.');
+  const err = auth.validateNewPassword(body.password);
+  if (err) throw fail(400, err);
+  auth.setPassword(body.password);
+  res.setHeader('set-cookie', auth.sessionCookie(auth.createSession(), SECURE));
+  return { ok: true };
+}, { public: true });
+
+route('POST', '/api/auth/login', (body, _p, req, res) => {
+  const ip = req.socket.remoteAddress;
+  if (auth.loginBlocked(ip)) throw fail(429, '비밀번호를 여러 번 틀렸습니다. 15분 뒤에 다시 시도해 주세요.');
+  if (!auth.checkPassword(body.password)) {
+    auth.recordFail(ip);
+    throw fail(401, '비밀번호가 맞지 않습니다.');
+  }
+  auth.clearFails(ip);
+  res.setHeader('set-cookie', auth.sessionCookie(auth.createSession(), SECURE));
+  return { ok: true };
+}, { public: true });
+
+route('POST', '/api/auth/logout', (_b, _p, req, res) => {
+  auth.destroySession(auth.readToken(req));
+  res.setHeader('set-cookie', auth.sessionCookie(null, SECURE));
+  return { ok: true };
+}, { public: true });
+
+route('POST', '/api/auth/password', (body, _p, _req, res) => {
+  if (!auth.checkPassword(body.current)) throw fail(400, '현재 비밀번호가 맞지 않습니다.');
+  const err = auth.validateNewPassword(body.password);
+  if (err) throw fail(400, err);
+  auth.setPassword(body.password);
+  res.setHeader('set-cookie', auth.sessionCookie(auth.createSession(), SECURE));
+  return { ok: true };
+});
+
+// ── 상태 ──
 route('GET', '/api/state', () => ({
   demo: ai.DEMO,
   owner: db.owner,
@@ -85,9 +184,24 @@ route('GET', '/api/state', () => ({
   orders: db.orders.slice(0, 50),
   tasks: db.tasks.slice(0, 200),
   briefing: db.briefing,
+  settings: db.settings,
+  google: google.status(),
 }));
 
-// 업무 지시
+// ── 설정 ──
+route('PUT', '/api/settings', (body) => {
+  const s = { ...db.settings };
+  if ('autoBriefing' in body) s.autoBriefing = Boolean(body.autoBriefing);
+  if ('briefingTime' in body) {
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(body.briefingTime)) throw fail(400, '시간 형식이 올바르지 않습니다 (예: 08:00).');
+    s.briefingTime = body.briefingTime;
+  }
+  db.settings = s;
+  save();
+  return s;
+});
+
+// ── 업무 지시 ──
 route('POST', '/api/orders', (body) => {
   const order = { id: uid('o'), text: text(body.text, '지시 내용', 4000), summary: '비서실장이 업무를 나누는 중…', status: 'planning', createdAt: now() };
   db.orders.unshift(order);
@@ -110,7 +224,7 @@ route('POST', '/api/employees/:id/tasks', (body, [id]) => {
   return task;
 });
 
-// 결재: 승인 / 수정 요청 / 반려 / 재시도
+// ── 결재: 승인 / 수정 요청 / 반려 / 재시도 ──
 route('POST', '/api/tasks/:id/approve', (_b, [id]) => {
   const t = findTask(id);
   if (t.status !== 'review') throw fail(409, '결재 대기 중인 업무만 승인할 수 있습니다.');
@@ -146,14 +260,43 @@ route('DELETE', '/api/tasks/:id', (_b, [id]) => {
   return { ok: true };
 });
 
-// 아침 브리핑
-route('POST', '/api/briefing', async () => {
-  db.briefing = { text: await ai.makeBriefing(ctx()), at: now() };
+// ── 승인된 결과물 → Google (Gmail 임시보관함 / Drive) ──
+const approvedTask = (id) => {
+  const t = findTask(id);
+  if (t.status !== 'done') throw fail(409, '결재(승인)된 업무만 Google로 보낼 수 있습니다.');
+  return t;
+};
+route('POST', '/api/tasks/:id/gmail-draft', async (body, [id]) => {
+  const t = approvedTask(id);
+  const draft = await google.createDraft({
+    to: typeof body.to === 'string' ? body.to.trim() : '',
+    subject: (typeof body.subject === 'string' && body.subject.trim()) || t.title,
+    html: text(body.html, '본문', 500000),
+  });
+  t.gmailDraftAt = now();
   save();
-  return db.briefing;
+  return draft;
+});
+route('POST', '/api/tasks/:id/drive', async (body, [id]) => {
+  const t = approvedTask(id);
+  const date = google.seoulDate(0);
+  const file = await google.saveToDrive({ name: `${date} ${t.title}`, html: text(body.html, '본문', 500000) });
+  t.driveLink = file.webViewLink;
+  save();
+  return file;
 });
 
-// 직원 관리
+// ── 캘린더 / 브리핑 ──
+route('GET', '/api/calendar', async () => ({ connected: google.connected(), events: await google.upcomingEvents() }));
+route('POST', '/api/briefing', () => makeBriefing('manual'));
+
+// ── Google 연결 해제 ──
+route('POST', '/api/google/disconnect', async () => {
+  await google.disconnect();
+  return google.status();
+});
+
+// ── 직원 관리 ──
 const cleanEmployee = (b) => ({
   name: text(b.name, '이름', 20),
   role: text(b.role, '직무', 40),
@@ -187,7 +330,7 @@ route('DELETE', '/api/employees/:id', (_b, [id]) => {
   return { ok: true };
 });
 
-// 지식창고
+// ── 지식창고 ──
 route('POST', '/api/knowledge', (body) => {
   const k = { id: uid('k'), title: text(body.title, '제목', 100), content: text(body.content, '내용', 20000) };
   db.knowledge.push(k);
@@ -200,12 +343,35 @@ route('DELETE', '/api/knowledge/:id', (_b, [id]) => {
   return { ok: true };
 });
 
+// ───────────── Google OAuth (브라우저 이동) ─────────────
+function redirect(res, to) {
+  res.writeHead(302, { location: to }).end();
+}
+async function handleGoogleAuth(url, req, res) {
+  if (!auth.isLoggedIn(req)) return redirect(res, '/');
+  if (url.pathname === '/auth/google/start') {
+    if (!google.configured()) return redirect(res, '/?google=not-configured');
+    return redirect(res, google.authUrl());
+  }
+  // /auth/google/callback
+  const q = url.searchParams;
+  if (q.get('error')) return redirect(res, `/?google=denied`);
+  if (!google.takeState(q.get('state') || '')) return redirect(res, '/?google=expired');
+  try {
+    await google.finishConnect(q.get('code') || '');
+    redirect(res, '/?google=connected');
+  } catch (err) {
+    console.error('Google 연결 실패:', err.message);
+    redirect(res, `/?google=error&msg=${encodeURIComponent(err.message)}`);
+  }
+}
+
 // ───────────── HTTP 서버 ─────────────
 async function readBody(req) {
   let data = '';
   for await (const chunk of req) {
     data += chunk;
-    if (data.length > 1_000_000) throw fail(413, '내용이 너무 깁니다.');
+    if (data.length > 2_000_000) throw fail(413, '내용이 너무 깁니다.');
   }
   if (!data) return {};
   try {
@@ -215,15 +381,43 @@ async function readBody(req) {
   }
 }
 
+// 다른 사이트에서 몰래 요청을 보내는 것(CSRF) 차단
+function sameOrigin(req) {
+  const origin = req.headers.origin;
+  if (!origin) return true; // 브라우저가 아닌 요청이거나 같은 사이트의 일부 요청
+  try {
+    return new URL(origin).host === req.headers.host;
+  } catch {
+    return false;
+  }
+}
+
+const SECURITY_HEADERS = {
+  'x-content-type-options': 'nosniff',
+  'x-frame-options': 'DENY',
+  'referrer-policy': 'same-origin',
+};
+
 const server = http.createServer(async (req, res) => {
+  for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.setHeader(k, v);
   const url = new URL(req.url, 'http://localhost');
+
+  if (url.pathname === '/auth/google/start' || url.pathname === '/auth/google/callback') {
+    return handleGoogleAuth(url, req, res).catch((err) => {
+      console.error(err);
+      res.writeHead(500).end('오류가 발생했습니다.');
+    });
+  }
+
   if (url.pathname.startsWith('/api/')) {
     const r = routes.find((r) => r.method === req.method && r.re.test(url.pathname));
     try {
       if (!r) throw fail(404, '없는 주소입니다.');
+      if (req.method !== 'GET' && !sameOrigin(req)) throw fail(403, '허용되지 않은 요청입니다.');
+      if (!r.public && !auth.isLoggedIn(req)) throw fail(401, '로그인이 필요합니다.');
       const params = url.pathname.match(r.re).slice(1).map(decodeURIComponent);
-      const out = await r.handler(await readBody(req), params);
-      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' }).end(JSON.stringify(out));
+      const out = await r.handler(await readBody(req), params, req, res);
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }).end(JSON.stringify(out));
     } catch (err) {
       if (!err.status) console.error(err);
       res.writeHead(err.status || 500, { 'content-type': 'application/json; charset=utf-8' }).end(JSON.stringify({ error: err.message }));
@@ -246,6 +440,10 @@ for (const t of db.tasks) if (t.status === 'working') Object.assign(t, { status:
 for (const o of db.orders) if (o.status === 'planning') Object.assign(o, { status: 'error', summary: '서버가 다시 시작되어 분배가 중단되었습니다.' });
 
 server.listen(PORT, () => {
-  console.log(`\n🏢 AI 사무실이 열렸습니다 → http://localhost:${PORT}`);
-  console.log(ai.DEMO ? '🧪 데모 모드 (API 키 없음): 예시 결과물로 동작합니다.\n' : '🤖 Claude 연결됨: AI 직원들이 실제로 일합니다.\n');
+  console.log(`\n🏢 AI 사무실이 열렸습니다 → ${google.appUrl()}`);
+  console.log(ai.DEMO ? '🧪 데모 모드: 예시 결과물로 동작합니다.' : '🤖 Claude 연결됨: AI 직원들이 실제로 일합니다.');
+  console.log(google.configured() ? `🔗 Google 연동 준비됨${google.connected() ? ` (${db.google.email || '연결됨'})` : ' (앱의 [설정]에서 연결하세요)'}` : '🔗 Google 연동: .env 에 GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET 를 넣으면 사용할 수 있습니다.');
+  console.log(auth.needsSetup() ? '🔐 처음 실행입니다. 브라우저에서 비밀번호를 정해 주세요.\n' : '');
+  setInterval(briefingTick, 30_000);
+  briefingTick();
 });
