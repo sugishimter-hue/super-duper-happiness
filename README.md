@@ -77,6 +77,22 @@
 node office/build.mjs
 ```
 
+## 🌍 체험판 웹사이트 (로그인 없이 누구나, 무료)
+
+`docs/` 폴더는 체험판을 일반 웹사이트로 만든 것입니다. GitHub Pages로 게시하면 claude.ai 로그인 없이 누구나 열 수 있습니다.
+
+- 주소: **https://sugishimter-hue.github.io/super-duper-happiness/**
+- 켜는 방법 (처음 한 번)
+  1. GitHub 저장소 → **Settings → Pages**
+  2. Source: **Deploy from a branch**
+  3. Branch: `claude/relaxed-newton-05x92d`, 폴더: `/docs` → **Save**
+  4. 1~2분 뒤 위 주소가 열립니다.
+- 체험판을 고친 뒤 다시 만들기:
+
+```bash
+node demo/build.mjs && node demo/site.mjs
+```
+
 ## 체험판 (설치 없이 화면 미리 보기)
 
 `demo/` 폴더의 스크립트로 서버 없이 브라우저에서 바로 열리는 체험판 HTML을 만들 수 있습니다. 예시 업무와 예시 일정이 들어 있고, AI·Google·저장은 실제로 동작하지 않습니다.

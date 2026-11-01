@@ -1,0 +1,1786 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="description" content="AI 비서실장과 직원 6명이 업무를 나눠 맡고, 대표는 결재만 합니다. 설치·로그인 없이 바로 체험해 보세요." />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="1인 창업자를 위한 AI 직원 사무실 · 체험판" />
+<meta property="og:description" content="AI 비서실장과 직원 6명이 업무를 나눠 맡고, 대표는 결재만 합니다. 설치·로그인 없이 바로 체험해 보세요." />
+<meta property="og:url" content="https://sugishimter-hue.github.io/super-duper-happiness/" />
+<meta property="og:image" content="https://sugishimter-hue.github.io/super-duper-happiness/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#8a5cf6" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>1인 창업자를 위한 AI 직원 사무실 · 체험판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" />
+<style>
+:root {
+  --banner-bg: #fff3d6;
+  --banner-fg: #6b4700;
+  --bg: #f6f4f1;
+  --card: #ffffff;
+  --text: #2b2622;
+  --muted: #7a716a;
+  --line: #e7e1da;
+  --accent: #8a5cf6;
+  --accent-soft: #efe8ff;
+  --ok: #1f9d6b;
+  --warn: #d98a00;
+  --bad: #d64545;
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --banner-bg: #3a2f14; --banner-fg: #f5d58a;
+    --bg: #17151a;
+    --card: #221f26;
+    --text: #ece8f0;
+    --muted: #a39cab;
+    --line: #36313d;
+    --accent: #a78bfa;
+    --accent-soft: #2e2640;
+   color-scheme: dark; }
+}
+:root[data-theme="dark"] { --banner-bg: #3a2f14; --banner-fg: #f5d58a;
+    --bg: #17151a;
+    --card: #221f26;
+    --text: #ece8f0;
+    --muted: #a39cab;
+    --line: #36313d;
+    --accent: #a78bfa;
+    --accent-soft: #2e2640;
+   color-scheme: dark; }
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.6 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+}
+h2 { font-size: 1.1rem; margin: 0 0 .4rem; }
+h3 { font-size: .95rem; margin: 1rem 0 .4rem; }
+.muted { color: var(--muted); }
+.hidden { display: none !important; }
+
+.top { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; gap: 12px; flex-wrap: wrap; }
+.brand { font-size: 1.15rem; }
+.brand .muted { font-size: .85rem; margin-left: 6px; }
+.badge { font-size: .8rem; padding: 4px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); }
+.badge.demo { background: #fff3d6; color: #8a5a00; }
+
+.tabs { display: flex; gap: 6px; padding: 0 16px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+.tabs button { border: 0; background: none; padding: 10px 12px; font: inherit; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+.tabs button.on { color: var(--text); border-color: var(--accent); font-weight: 600; }
+.pill { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 99px; background: var(--bad); color: #fff; font-size: .75rem; }
+.pill:empty { display: none; }
+
+main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.stack { display: flex; flex-direction: column; gap: 8px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.grid2 > .card { margin-bottom: 0; }
+.grid2 { margin-bottom: 16px; }
+@media (max-width: 400px) { .grid2 { grid-template-columns: 1fr; } }
+
+textarea, input { width: 100%; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+textarea:focus, input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+label { font-size: .85rem; color: var(--muted); }
+
+button { font: inherit; cursor: pointer; border-radius: 10px; padding: 8px 14px; border: 1px solid var(--line); background: var(--card); color: var(--text); }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+button.ghost { background: none; }
+button.ok { background: var(--ok); border-color: var(--ok); color: #fff; }
+button.bad { color: var(--bad); }
+button:disabled { opacity: .5; cursor: wait; }
+.order form { display: flex; flex-direction: column; gap: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { font-size: .8rem; padding: 4px 10px; border-radius: 99px; background: var(--accent-soft); border: 0; color: var(--accent); }
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.stat { text-align: center; padding: 10px 4px; border-radius: 10px; background: var(--bg); }
+.stat b { display: block; font-size: 1.4rem; }
+.stat span { font-size: .8rem; color: var(--muted); }
+.orders { list-style: none; padding: 0; margin: 0; font-size: .88rem; }
+.orders li { padding: 6px 0; border-top: 1px dashed var(--line); }
+.orders small { color: var(--muted); display: block; }
+
+.board { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 12px; overflow-x: auto; }
+@media (max-width: 760px) { .board { grid-template-columns: 1fr; } }
+.col { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px; min-height: 120px; }
+.col h3 { margin: 0 0 8px; display: flex; justify-content: space-between; }
+.task { background: var(--bg); border-radius: 10px; padding: 10px; margin-bottom: 8px; cursor: pointer; border-left: 4px solid var(--line); }
+.task:hover { outline: 1px solid var(--accent); }
+.task .who { font-size: .8rem; color: var(--muted); }
+.task.working { border-color: var(--warn); }
+.task.review { border-color: var(--accent); }
+.task.done { border-color: var(--ok); }
+.task.error, .task.rejected { border-color: var(--bad); }
+.spin { display: inline-block; animation: spin 1.2s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.review-item { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+.review-item .md { max-height: 420px; overflow: auto; background: var(--bg); padding: 12px 16px; border-radius: 10px; margin: 10px 0; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.org { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
+.emp { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+.emp .face { font-size: 2rem; }
+.emp .dept { font-size: .78rem; color: var(--accent); }
+.emp p { font-size: .85rem; color: var(--muted); margin: 0; flex: 1; }
+.emp .load { font-size: .8rem; }
+
+.kb { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; }
+.kb pre { white-space: pre-wrap; font: inherit; margin: 6px 0 0; color: var(--muted); }
+
+dialog { border: 0; border-radius: var(--radius); padding: 0; width: min(760px, 94vw); background: var(--card); color: var(--text); }
+dialog::backdrop { background: rgba(0,0,0,.45); }
+#modalBody { padding: 20px; max-height: 86vh; overflow: auto; }
+
+.md h1 { font-size: 1.25rem; } .md h2 { font-size: 1.1rem; } .md h3 { font-size: 1rem; }
+.md table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: .9rem; }
+.md th, .md td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; }
+.md blockquote { margin: 8px 0; padding-left: 12px; border-left: 3px solid var(--accent); color: var(--muted); }
+.md code { background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+.md hr { border: 0; border-top: 1px solid var(--line); }
+.err { color: var(--bad); font-size: .9rem; }
+.toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 99px; z-index: 10; }
+
+/* 로그인 */
+.auth { position: fixed; inset: 0; z-index: 20; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.auth-card { width: min(380px, 100%); display: flex; flex-direction: column; gap: 10px; text-align: center; }
+.auth-logo { font-size: 3rem; }
+.err:empty { display: none; }
+
+/* 캘린더 */
+.events { list-style: none; padding: 0; margin: 0; }
+.events li { display: flex; gap: 10px; padding: 6px 0; border-top: 1px dashed var(--line); font-size: .9rem; color: var(--text); }
+.events .t { min-width: 64px; color: var(--accent); font-weight: 600; }
+.events .day { font-size: .78rem; color: var(--muted); margin-top: 6px; }
+.events small { color: var(--muted); display: block; }
+
+/* 설정 */
+.settings-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.settings-row input[type=time] { width: auto; }
+.switch { display: flex; gap: 6px; align-items: center; color: var(--text); font-size: .95rem; }
+.switch input { width: auto; }
+.narrow { max-width: 360px; }
+.ok-text { color: var(--ok); }
+.links { font-size: .85rem; margin-top: 6px; }
+.links a { color: var(--accent); margin-right: 10px; }
+ol.guide { padding-left: 20px; font-size: .9rem; }
+ol.guide li { margin-bottom: 4px; }
+.btn-link { display: inline-block; background: var(--accent); color: #fff; font-weight: 600; padding: 8px 14px; border-radius: 10px; text-decoration: none; }
+
+/* 주간 보고 */
+.report-head { margin-bottom: 12px; align-items: flex-start; }
+.rep-stats { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); margin-bottom: 16px; }
+.rep-stats .stat { background: var(--card); border: 1px solid var(--line); }
+.bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 170px; padding-top: 10px; }
+.bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; font-size: .8rem; color: var(--muted); }
+.bar i { display: block; width: 70%; max-width: 38px; background: var(--accent); border-radius: 6px 6px 2px 2px; min-height: 3px; }
+.bar b { color: var(--text); font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; }
+.rep-table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.rep-table th, .rep-table td { padding: 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.rep-table th:first-child, .rep-table td:first-child { text-align: left; }
+.rep-table th { color: var(--muted); font-weight: 600; font-size: .8rem; }
+.num { width: 90px; }
+select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+
+/* PPT · 카드뉴스 스튜디오 */
+.studio-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0 12px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.cards-grid figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.cards-grid img { width: 100%; border-radius: 8px; border: 1px solid var(--line); }
+.cards-grid a { font-size: .8rem; color: var(--accent); }
+.slide-list { display: flex; flex-direction: column; gap: 8px; }
+.slide-mini { border: 1px solid var(--line); border-left: 6px solid var(--accent); border-radius: 8px; padding: 10px 14px; background: var(--bg); }
+.slide-mini b { display: block; margin-bottom: 4px; }
+.slide-mini ul { margin: 0; padding-left: 18px; font-size: .88rem; }
+.slide-mini small { display: block; color: var(--muted); margin-top: 4px; font-size: .78rem; }
+.caption-box { white-space: pre-wrap; background: var(--bg); padding: 10px 12px; border-radius: 8px; font-size: .88rem; }
+
+body { font-family: 'Noto Sans KR', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif; }
+.demo-banner { background: var(--banner-bg); color: var(--banner-fg); font-size: .88rem; padding-block: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.demo-banner .intro { flex: 1 1 520px; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.demo-banner p { margin: 0; }
+.demo-banner .intro-title { font-size: 1.02rem; }
+.demo-banner .tour { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.demo-banner .fine { font-size: .78rem; opacity: .85; }
+.demo-banner .cta { display: flex; gap: 8px; flex-wrap: wrap; }
+.demo-banner .cta a, .demo-banner .cta button { text-decoration: none; font: inherit; font-weight: 700; padding: 9px 16px; border-radius: 10px; white-space: nowrap; cursor: pointer; }
+.demo-banner .cta button { border: 0; }
+.demo-banner .cta-main { background: var(--accent); color: #fff; }
+.demo-banner .cta-sub { border: 1px solid var(--banner-fg); color: var(--banner-fg); }
+.badge.demo { background: var(--banner-bg); color: var(--banner-fg); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+#consultModal { border: 0; border-radius: var(--radius); padding: 0; width: min(560px, 94vw); background: var(--card); color: var(--text); }
+#consultModal::backdrop { background: rgba(0,0,0,.45); }
+.consult { padding: 20px; max-height: 88vh; overflow: auto; }
+.consult label { color: var(--text); font-size: .88rem; }
+.consult .req { color: var(--bad); }
+.consult .interests { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 4px 12px; }
+.consult .interests legend { font-size: .88rem; padding: 0 4px; }
+.consult .interests label, .consult .agree { display: flex; gap: 6px; align-items: flex-start; }
+.consult input[type=checkbox] { width: auto; margin-top: 4px; }
+.consult .agree { font-size: .8rem; color: var(--muted); }
+.consult .fine-print { font-size: .78rem; }
+#consultMsg { font-size: .88rem; }
+
+</style>
+
+  <!-- 로그인 / 처음 비밀번호 설정 -->
+  <div id="authScreen" class="auth hidden">
+    <form id="authForm" class="card auth-card">
+      <div class="auth-logo">🏢</div>
+      <h2 id="authTitle">나의 AI 사무실</h2>
+      <p id="authDesc" class="muted"></p>
+      <input id="authPw" type="password" autocomplete="current-password" placeholder="비밀번호" />
+      <input id="authPw2" type="password" autocomplete="new-password" placeholder="비밀번호 한 번 더" class="hidden" />
+      <input id="authCode" type="text" autocomplete="off" placeholder="설정 코드 (Render의 SETUP_CODE)" class="hidden" />
+      <p id="authErr" class="err"></p>
+      <button class="primary" type="submit" id="authBtn">로그인</button>
+    </form>
+  </div>
+
+  <header class="top">
+    <div class="brand">🏢 <b>나의 AI 사무실</b> <span id="owner" class="muted"></span></div>
+    <span id="mode" class="badge"></span>
+  </header>
+
+  <div class="demo-banner" role="note">
+    <div class="intro">
+      <p class="intro-title"><b>1인 창업자를 위한 AI 직원 사무실</b> 체험판</p>
+      <p>AI 비서실장과 직원 6명이 업무를 나눠 맡고, 대표는 결재만 합니다. 전경숙 대표의 실제 사무실 구성을 예시로 보여 드립니다.</p>
+      <p class="tour"><span>① 아래 보라색 예시를 누르고 <b>[지시하기]</b></span><span>② <b>결재함</b>에서 승인·수정 요청</span><span>③ <b>카드뉴스·PPT</b> 만들기와 <b>주간 보고</b> 보기</span></p>
+      <p class="fine">체험판에서는 AI 작성, Google·카카오톡 연결, 파일 저장이 실제로 이루어지지 않고 예시가 표시됩니다. 새로고침하면 처음 상태로 돌아갑니다.</p>
+    </div>
+    <div class="cta">
+      <button type="button" class="cta-main" data-consult>도입 문의하기</button>
+      <a href="https://www.gptstore2.ai.kr" target="_blank" rel="noopener" class="cta-sub">AI 강의 보기</a>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs">
+    <button data-view="home" class="on">🏠 대시보드</button>
+    <button data-view="review">✅ 결재함 <span id="reviewCount" class="pill"></span></button>
+    <button data-view="staff">👥 직원 관리</button>
+    <button data-view="report">📈 주간 보고</button>
+    <button data-view="kb">📚 지식창고</button>
+    <button data-view="settings">⚙️ 설정</button>
+  </nav>
+
+  <main>
+    <!-- 대시보드 -->
+    <section id="view-home" class="view">
+      <div class="card order">
+        <h2>💬 업무 지시</h2>
+        <p class="muted">말하듯이 적어 주세요. 비서실장 <b>유니</b>가 알맞은 직원에게 나눠 줍니다.</p>
+        <form id="orderForm">
+          <textarea id="orderText" rows="3" placeholder="예) 다음 달 천안시청 공무원 대상 'AI로 일 잘하는 법' 2시간 특강 준비해 줘. 홍보글이랑 수강 안내문도."></textarea>
+          <div class="row">
+            <div class="chips" id="examples"></div>
+            <button class="primary" type="submit">지시하기 ▶</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="row"><h2>☀️ 비서실장 브리핑</h2><button id="briefBtn" class="ghost">새로 받기</button></div>
+          <div id="briefing" class="md muted">아직 브리핑이 없습니다. [새로 받기]를 눌러 보세요.</div>
+        </div>
+        <div class="card">
+          <div class="row"><h2>📅 오늘·내일 일정</h2><button id="calBtn" class="ghost">새로고침</button></div>
+          <div id="calendar" class="muted">불러오는 중…</div>
+        </div>
+        <div class="card">
+          <h2>📊 업무 현황</h2>
+          <div class="stats" id="stats"></div>
+          <h3>최근 지시</h3>
+          <ul id="orders" class="orders"></ul>
+        </div>
+      </div>
+
+      <div class="board" id="board"></div>
+    </section>
+
+    <!-- 결재함 -->
+    <section id="view-review" class="view hidden">
+      <div id="reviewList"></div>
+    </section>
+
+    <!-- 직원 관리 -->
+    <section id="view-staff" class="view hidden">
+      <div class="row"><h2>👥 우리 회사 AI 직원</h2><button id="addEmp" class="primary">+ 직원 채용</button></div>
+      <div id="org" class="org"></div>
+    </section>
+
+    <!-- 지식창고 -->
+    <section id="view-kb" class="view hidden">
+      <div class="card">
+        <h2>📚 회사 지식창고</h2>
+        <p class="muted">강의 자료 요약, 상품·서비스 소개, 자주 쓰는 문구, 가격표 등을 넣어 두면 <b>모든 직원이 업무할 때 참고</b>합니다. 고객 개인정보는 넣지 마세요.</p>
+        <form id="kbForm" class="stack">
+          <input id="kbTitle" placeholder="제목 (예: 금융테라피 강의 소개)" />
+          <textarea id="kbContent" rows="5" placeholder="내용"></textarea>
+          <button class="primary" type="submit">저장</button>
+        </form>
+      </div>
+      <div id="kbList"></div>
+    </section>
+
+    <!-- 주간 보고 -->
+    <section id="view-report" class="view hidden">
+      <div class="row report-head">
+        <div>
+          <h2>📈 주간 업무 보고서</h2>
+          <p id="repRange" class="muted"></p>
+        </div>
+        <div class="actions">
+          <button id="repPrev">◀ 이전 주</button>
+          <button id="repNext">다음 주 ▶</button>
+          <button id="repDl">⬇️ 저장(.md)</button>
+        </div>
+      </div>
+      <div class="stats rep-stats" id="repStats"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="row"><h2>🤵 비서실장 총평</h2><button id="repReviewBtn" class="ghost">AI 총평 받기</button></div>
+          <div id="repReview" class="md muted"></div>
+        </div>
+        <div class="card">
+          <h2>📆 요일별 완료</h2>
+          <div id="repDaily" class="bars"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>👥 직원별 실적</h2>
+        <div class="table-wrap"><table class="rep-table" id="repTable"></table></div>
+      </div>
+      <div class="card">
+        <h2>✅ 이번 주 완료한 업무</h2>
+        <ul id="repDone" class="orders"></ul>
+      </div>
+    </section>
+
+    <!-- 설정 -->
+    <section id="view-settings" class="view hidden">
+      <div class="card">
+        <h2>🔗 Google 연동</h2>
+        <div id="googleBox"></div>
+      </div>
+      <div class="card">
+        <h2>💬 카카오톡 알림</h2>
+        <div id="kakaoBox"></div>
+      </div>
+      <div class="card">
+        <h2>🔔 알림 · 보고서 · 디자인</h2>
+        <form id="notifySettings" class="stack">
+          <label class="switch"><input type="checkbox" id="notifyReview" /> 결과물이 결재함에 도착하면 카톡 알림</label>
+          <label class="switch"><input type="checkbox" id="notifyBriefing" /> 아침 자동 브리핑을 카톡으로 받기</label>
+          <label class="switch"><input type="checkbox" id="notifyWeekly" /> 월요일 아침 지난주 업무 보고를 카톡으로 받기</label>
+          <div class="settings-row">
+            <label>업무 1건당 절약 시간(분) <input type="number" id="minutesPerTask" min="1" max="600" class="num" /></label>
+            <label>PPT·카드뉴스 기본 색상 <select id="slideTheme"></select></label>
+          </div>
+          <div><button class="primary" type="submit">저장</button></div>
+        </form>
+      </div>
+      <div class="card">
+        <h2>☀️ 아침 자동 브리핑</h2>
+        <p class="muted">정한 시간이 되면 비서실장이 <b>캘린더 일정과 업무 현황</b>을 보고 브리핑을 써 둡니다. (앱이 켜져 있어야 동작하고, 켜져 있지 않았다면 다음에 켤 때 바로 만듭니다.)</p>
+        <form id="briefSettings" class="settings-row">
+          <label class="switch"><input type="checkbox" id="autoBriefing" /> 매일 자동 브리핑</label>
+          <label>시간 <input type="time" id="briefingTime" /></label>
+          <button class="primary" type="submit">저장</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>🔐 비밀번호 변경</h2>
+        <form id="pwForm" class="stack narrow">
+          <input type="password" id="pwCur" autocomplete="current-password" placeholder="현재 비밀번호" />
+          <input type="password" id="pwNew" autocomplete="new-password" placeholder="새 비밀번호 (8자 이상)" />
+          <input type="password" id="pwNew2" autocomplete="new-password" placeholder="새 비밀번호 한 번 더" />
+          <button class="primary" type="submit">변경</button>
+        </form>
+        <p class="muted">비밀번호를 잊으셨다면 앱을 끄고 검은 창에서 <code>npm run reset-password</code> 를 실행한 뒤 다시 켜세요.</p>
+      </div>
+      <div class="card row">
+        <span class="muted">이 기기에서 로그아웃합니다.</span>
+        <button id="logoutBtn" class="bad">로그아웃</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- 상세 보기 / 편집 모달 -->
+  <dialog id="modal"><div id="modalBody"></div></dialog>
+
+  
+
+
+<dialog id="consultModal" aria-labelledby="consultTitle">
+  <div class="consult">
+    <form id="consultForm" class="stack" novalidate>
+      <h2 id="consultTitle">🏢 AI 직원 사무실 도입 상담 신청</h2>
+      <p class="muted">1인 창업자·설계사·강사를 위한 AI 직원 사무실 도입과 교육을 상담해 드립니다. 아래를 작성하시면 상담 신청서가 만들어집니다.</p>
+      <label for="cName">이름 <b class="req">*</b></label>
+      <input id="cName" name="name" autocomplete="name" placeholder="홍길동" />
+      <label for="cContact">연락처 <b class="req">*</b></label>
+      <input id="cContact" name="contact" autocomplete="tel" placeholder="010-0000-0000 또는 이메일" />
+      <fieldset class="interests">
+        <legend>관심 분야 <b class="req">*</b></legend>
+        <label><input type="checkbox" name="interest" value="AI 직원 사무실 도입" checked /> AI 직원 사무실 도입</label>
+        <label><input type="checkbox" name="interest" value="AI 활용 강의·교육" /> AI 활용 강의·교육</label>
+        <label><input type="checkbox" name="interest" value="AI 자격증 과정" /> AI 자격증 과정</label>
+        <label><input type="checkbox" name="interest" value="재무·은퇴 설계 상담" /> 재무·은퇴 설계 상담</label>
+        <label><input type="checkbox" name="interest" value="기관·기업 단체 교육" /> 기관·기업 단체 교육</label>
+      </fieldset>
+      <label for="cBiz">하시는 일 (선택)</label>
+      <input id="cBiz" name="biz" placeholder="예: 보험설계사, 1인 강사, 소상공인" />
+      <label for="cTime">희망 상담 시간 (선택)</label>
+      <input id="cTime" name="time" placeholder="예: 평일 오후, 화요일 저녁" />
+      <label for="cMemo">문의 내용 (선택)</label>
+      <textarea id="cMemo" name="memo" rows="3" placeholder="궁금한 점을 자유롭게 적어 주세요"></textarea>
+      <label class="agree"><input type="checkbox" name="agree" /> 상담을 위한 개인정보(이름·연락처) 수집·이용에 동의합니다. 상담 후 목적이 끝나면 파기합니다.</label>
+      <p id="consultErr" class="err" role="alert"></p>
+      <div class="actions"><button type="submit" class="primary">신청서 만들기</button><button type="button" data-consult-close>닫기</button></div>
+    </form>
+    <div id="consultDone" class="stack" hidden>
+      <h2>✅ 신청서가 준비되었습니다</h2>
+      <p id="consultHow"></p>
+      <textarea id="consultMsg" rows="8" readonly></textarea>
+      <div class="actions">
+        <button type="button" class="primary" id="consultCopy">① 신청서 복사</button>
+        <a id="consultGo" class="btn-link" target="_blank" rel="noopener">② 카카오톡 채널 열기</a>
+      </div>
+      <p id="consultCopied" class="muted" role="status"></p>
+      <p class="muted fine-print">입력하신 내용은 이 화면에만 있고 따로 저장되지 않습니다.</p>
+      <div class="actions"><button type="button" id="consultBack">← 다시 고치기</button><button type="button" data-consult-close>닫기</button></div>
+    </div>
+  </div>
+</dialog>
+<script>
+window.alert = (m) => window.__demoToast ? window.__demoToast(m) : console.log(m);
+window.confirm = () => true;
+// 체험판 전용: 서버 대신 브라우저 안에서 동작하는 가짜 백엔드
+// (실제 AI·Google·파일 저장 없이 화면 흐름만 보여 줍니다. 새로고침하면 처음 상태로 돌아갑니다.)
+(() => {
+  const SEED = {"OWNER":{"name":"전경숙","title":"대표","company":"재무솔루션연구소 · AI글로벌유니패스아카데미","profile":"천안에서 활동하는 1인 창업자. 재무설계·은퇴설계·보험 상담, AI 활용·금융테라피·소통·힐링·컬러테라피 강의, AI 얼굴분석심리상담, AI 자격증 교육을 한다. 운영 사이트: www.aijemu.ai.kr(AI 재무 플랫폼), www.gptstore.ai.kr(한국AIXR미래교육총연합회), www.kfcai.kr(충남AIXR미래교육총연합회 회장), www.gptstore2.ai.kr(에이아이글로벌유니패스아카데미 교육서비스)."},"SECRETARY":{"id":"secretary","name":"유니","role":"AI 비서실장","dept":"비서실","emoji":"🤵","guide":"대표의 지시를 받아 업무를 쪼개고, 가장 알맞은 직원에게 배정한다. 매일 아침 진행 상황과 우선순위를 브리핑한다.","keywords":[]},"EMPLOYEES":[{"id":"fin-analyst","name":"재희","role":"재무설계·고객관리 매니저","dept":"재무상담팀","emoji":"💰","guide":"고객 재무 현황 정리, 은퇴자금·보장 분석 초안, 상담 전 고객 요약 카드를 만든다. 계산 근거와 가정을 표로 보여 주고, 특정 상품 가입 권유나 수익 보장 표현은 쓰지 않으며, 분석 자료 끝에 \"최종 판단은 대표 상담 후 확정\" 문구를 넣는다. 상담 후 감사 문자, 계약 갱신·생일·기념일 안내, 사후관리 일정표도 맡는다. 문자는 따뜻하고 짧게(90자 안팎) 여러 버전으로 제안한다.","keywords":["재무","은퇴","보장","보험","연금","자산","노후","세금","계산","고객","문자","감사","생일","갱신","사후관리","안부","초대"]},{"id":"lecture-planner","name":"지우","role":"교육 기획·수강생 관리","dept":"교육사업팀","emoji":"🎓","guide":"AI 활용, 금융테라피, 컬러테라피, 소통·힐링 강의의 강의계획서와 슬라이드 구성안을 만든다. 대상·시간·목표를 먼저 정리하고, 시간대별 진행표와 슬라이드별 핵심 문구·활동을 제시한다. 수강 안내문, 준비물 공지, 출석·수료 안내, 수강 후기 요청과 정리도 맡는다.","keywords":["강의","세미나","특강","커리큘럼","교안","PPT","슬라이드","워크숍","교육","수강생","안내문","수료","출석","후기","등록"]},{"id":"exam-writer","name":"서준","role":"자격증 출제위원","dept":"교육사업팀","emoji":"📝","guide":"AI 자격증, AI 얼굴분석심리상담사 등 자격과정의 문제은행과 학습자료를 만든다. 객관식은 4지선다, 정답과 해설을 함께 쓰고 난이도(상/중/하)를 표시한다.","keywords":["자격증","시험","문제","문제은행","기출","학습자료","퀴즈","평가"]},{"id":"sns","name":"리아","role":"마케팅·제안서 담당","dept":"마케팅팀","emoji":"📢","guide":"블로그 글, 인스타그램 캡션·해시태그, 카드뉴스 문구, 유튜브 쇼츠 대본을 만든다. 대표의 따뜻하고 신뢰감 있는 말투를 유지하고, 과장 광고나 금융상품 수익 약속 표현은 피한다. 기관·기업·학교 대상 강의 제안서와 사업계획서 초안도 맡으며, 제안서는 배경 → 목표 → 프로그램 → 기대효과 → 강사 소개 → 비용 순서로 정리한다.","keywords":["홍보","SNS","블로그","인스타","유튜브","쇼츠","카드뉴스","마케팅","모집","광고","해시태그","제안서","기획안","사업계획","기관","기업","견적","지원사업"]},{"id":"web","name":"한결","role":"사이트·협회 운영","dept":"플랫폼팀","emoji":"🌐","guide":"aijemu.ai.kr, gptstore.ai.kr, kfcai.kr, gptstore2.ai.kr 의 공지사항, 상세페이지 문구, FAQ, 업데이트 초안을 만든다. 충남AIXR미래교육총연합회·한국AIXR미래교육총연합회의 회의록, 공문, 회원 안내문, 행사 보고서도 맡는다.","keywords":["사이트","홈페이지","공지사항","상세페이지","FAQ","플랫폼","웹","aijemu","gptstore","kfcai","협회","연합회","회의록","공문","회원","이사회","총회","행사","보고서"]},{"id":"writer","name":"윤슬","role":"집필·상담 기록 담당","dept":"콘텐츠·상담지원팀","emoji":"✍️","guide":"책 원고의 목차와 초안, 칼럼, 독서 노트, 필사 문장 정리를 돕고, 감성적이면서 생각이 깊은 대표의 문체를 살린다. AI 얼굴분석심리상담의 상담 기록 정리, 상담 리포트 양식, 상담 후 안내문도 만든다. 상담 자료에는 단정적 판단이나 의학적·심리 진단 표현을 쓰지 않고, 해석은 대표가 한다는 점을 밝힌다.","keywords":["책","원고","목차","칼럼","독서","필사","에세이","출판","글쓰기","얼굴분석","관상","심리","상담 기록","상담 리포트","컬러테라피","힐링"]}],"KNOWLEDGE":[{"id":"k-tone","title":"대표 말투 · 브랜드 원칙","content":"따뜻하고 신뢰감 있게, 어려운 금융·AI 용어는 쉬운 말로 풀어서 쓴다. \"함께\", \"든든한\", \"나다운 삶\" 같은 표현을 즐겨 쓴다. 과장·공포 마케팅은 쓰지 않는다."},{"id":"k-kakao","title":"상담·문의 창구 (카카오톡 채널)","content":"고객·수강생·방문자에게 상담이나 문의를 안내할 때는 대표 카카오톡 채널을 쓴다.\n- 채널 주소: https://pf.kakao.com/_xmxdxjQn\n- 1:1 상담 채팅 바로가기: https://pf.kakao.com/_xmxdxjQn/chat\n\n쓰는 곳: 고객 안내 문자 마지막 줄, SNS 게시물·카드뉴스 마지막 장의 신청·문의 안내, 강의 제안서·수강 안내문의 문의처, 홈페이지 공지의 문의 방법.\n문구 예: \"상담·문의는 카카오톡 채널로 편하게 남겨 주세요 👉 https://pf.kakao.com/_xmxdxjQn/chat\"\n전화번호나 개인 이메일은 대표가 따로 지시할 때만 쓴다."}]}; // 빌드 때 src/seed.js 내용이 들어갑니다
+  const THEMES = {"lavender":{"name":"라벤더","bg":"F6F2FF","panel":"FFFFFF","accent":"7C4DDB","text":"2B2236","sub":"6B6178"},"navy":{"name":"네이비 골드","bg":"13233F","panel":"1C3156","accent":"F2C14E","text":"FFFFFF","sub":"C9D3E6"},"coral":{"name":"코랄","bg":"FFF1EC","panel":"FFFFFF","accent":"E2604B","text":"3A2420","sub":"7A5A52"},"forest":{"name":"포레스트","bg":"EEF5EF","panel":"FFFFFF","accent":"2F7D57","text":"1F2D24","sub":"56695C"}}; // 빌드 때 src/slides.js 색상이 들어갑니다
+  const uid = (p) => `${p}-${Math.random().toString(36).slice(2, 10)}`;
+  const now = () => new Date().toISOString();
+  const ago = (min) => new Date(Date.now() - min * 60000).toISOString();
+  const kst = (dayOffset, hh, mm) => {
+    const d = new Date(Date.now() + 9 * 3600e3 + dayOffset * 864e5).toISOString().slice(0, 10);
+    return `${d}T${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:00+09:00`;
+  };
+  const kstDate = (dayOffset) => new Date(Date.now() + 9 * 3600e3 + dayOffset * 864e5).toISOString().slice(0, 10);
+
+  // ───────── 직원별 예시 결과물 ─────────
+  const SAMPLE = {
+    'fin-analyst': (o) => `# 은퇴자금 분석 요약 카드 (초안)
+
+**관련 지시:** ${o}
+
+## 가정
+| 항목 | 값 |
+|---|---|
+| 현재 나이 / 은퇴 희망 나이 | 52세 / 63세 |
+| 은퇴 후 희망 월 생활비 | 280만 원 (현재 가치) |
+| 예상 국민연금 (65세부터) | 월 115만 원 [확인 필요: 연금공단 예상액 조회] |
+| 물가상승률 가정 | 연 2.5% |
+
+## 부족자금 계산
+- 63~65세 연금 공백기 2년: 약 **6,700만 원** 필요
+- 65세 이후 월 부족분 165만 원 × 25년 → 은퇴 시점 기준 약 **4억 1천만 원** 필요
+- 현재 준비 자산(퇴직연금·개인연금): 약 1억 8천만 원 → **부족 약 2억 9,700만 원**
+
+## 상담 때 함께 볼 질문
+1. 은퇴 후에도 강의·상담 등 소득 활동을 이어 갈 계획이 있으신가요?
+2. 주택을 활용(주택연금 등)할 의향이 있으신가요?
+3. 자녀 교육·결혼 자금 계획은 어떻게 되시나요?
+
+---
+*최종 판단은 대표 상담 후 확정합니다. 특정 상품 권유가 아닌 분석 자료입니다.*`,
+    crm: (o) => `# 고객 안내 문자 (3안)
+
+**관련 지시:** ${o}
+
+**① 따뜻한 버전**
+> [고객명]님, 안녕하세요 😊 재무솔루션연구소 전경숙입니다. 이번 달 '든든한 은퇴설계 세미나'에 [고객명]님을 꼭 초대하고 싶어 연락드려요. 편하게 오셔서 차 한잔하며 함께 이야기 나눠요.
+
+**② 간결한 버전**
+> [고객명]님, 전경숙입니다. ○월 ○일(토) 오전 10시 은퇴설계 세미나에 초대합니다. 참석 여부만 회신 주시면 자리 마련해 둘게요.
+
+**③ 혜택 강조 버전**
+> [고객명]님! 은퇴 후 매달 얼마가 필요한지, 한 번에 계산해 드리는 세미나를 엽니다. 참석하시면 1:1 은퇴자금 진단표를 드려요 📋
+
+---
+*발송은 대표님 승인 후 직접 진행합니다.*`,
+    'lecture-planner': (o) => `# 강의계획서 (초안)
+
+**관련 지시:** ${o}
+
+| 항목 | 내용 |
+|---|---|
+| 대상 | 50~60대 직장인·예비 은퇴자 20명 |
+| 시간 | 2시간 (휴식 10분 포함) |
+| 목표 | 내 은퇴자금 규모를 스스로 계산하고, 오늘 할 일 1가지를 정한다 |
+
+## 진행표
+| 시간 | 내용 | 활동 |
+|---|---|---|
+| 0:00–0:15 | 여는 이야기: 나다운 은퇴란? | 컬러카드로 '은퇴 후 나의 하루' 고르기 |
+| 0:15–0:50 | 은퇴자금, 얼마면 될까 | 생활비 체크리스트 작성 |
+| 0:50–1:00 | 휴식 | |
+| 1:00–1:35 | 3층 연금 이해하기 | 내 연금 예상액 조회 실습 |
+| 1:35–2:00 | 나의 실행 계획 1가지 | 짝 나눔, 질의응답 |
+
+## 슬라이드 구성 (12장)
+1. 표지 · 2. 강사 소개 · 3. 은퇴 후 시간은 10만 시간 · 4~6. 생활비 계산 · 7~9. 3층 연금 · 10. 사례 · 11. 실행 계획 · 12. 마무리`,
+    'exam-writer': (o) => `# 예상문제 (일부 예시)
+
+**관련 지시:** ${o}
+
+**1. (난이도 하)** AI 얼굴분석 상담에서 상담자가 가장 먼저 해야 할 일은?
+1) 분석 결과를 단정적으로 전달한다
+2) 내담자의 동의를 받고 분석 목적을 설명한다
+3) 사진을 SNS에 공유한다
+4) 결과를 의학적 진단으로 안내한다
+
+**정답:** 2 · **해설:** 상담은 동의와 목적 설명에서 시작하며, 결과는 참고 자료로 다룹니다.
+
+**2. (난이도 중)** 생성형 AI 결과물을 상담 자료로 쓸 때 옳지 않은 것은?
+1) 사실 여부를 확인한다
+2) 개인정보를 가린다
+3) AI 답변을 그대로 최종 판단으로 쓴다
+4) 출처와 한계를 함께 안내한다
+
+**정답:** 3 · **해설:** AI 결과는 초안이며 최종 판단은 전문가가 합니다.
+
+*(실제 사용 시 요청한 개수만큼 만들어집니다)*`,
+    'student-care': (o) => `# 수강 안내문 (초안)
+
+**관련 지시:** ${o}
+
+안녕하세요, 에이아이글로벌유니패스아카데미입니다 🌿
+
+신청해 주신 강의 안내드립니다.
+- **일시:** [확인 필요: 날짜] 오전 10시 ~ 12시
+- **장소:** [확인 필요: 장소] (천안)
+- **준비물:** 스마트폰(충전), 필기도구
+- **문의:** [대표 연락처]
+
+수업 전날 한 번 더 안내 문자를 드릴게요. 함께 배우는 시간 기대하겠습니다!`,
+    sns: (o) => `# 인스타그램 홍보 문구 (초안)
+
+**관련 지시:** ${o}
+
+## 카드뉴스 5장 문구
+1. **"요즘 마음이 무슨 색인가요?"**
+2. 색은 말보다 먼저 마음을 보여 줍니다
+3. 컬러테라피 힐링 특강: 나에게 맞는 색으로 쉬어 가는 2시간
+4. 이런 분께 추천해요: 지친 직장인 · 쉼이 필요한 엄마 · 나를 알고 싶은 분
+5. 신청은 프로필 링크에서 🌈 (선착순 20명)
+
+## 캡션
+오늘 하루, 내 마음의 색을 들여다본 적 있으신가요? 🎨
+따뜻한 색 한 가지로도 마음은 달라질 수 있어요.
+함께 쉬어 가는 시간에 초대합니다.
+
+#컬러테라피 #힐링특강 #천안강의 #마음챙김 #나다운삶 #전경숙강사`,
+    proposal: (o) => `# 강의 제안서 (초안)
+
+**관련 지시:** ${o}
+
+## 1. 배경
+생성형 AI가 업무 방식을 빠르게 바꾸고 있지만, 현장에서는 "어디서부터 써야 할지 모르겠다"는 목소리가 많습니다.
+
+## 2. 목표
+- 업무에 바로 쓰는 AI 활용법 3가지 익히기
+- 보고서·공문 초안 작성 시간 절반으로 줄이기
+
+## 3. 프로그램
+| 회차 | 주제 | 시간 |
+|---|---|---|
+| 1 | AI와 친해지기: 질문 잘하는 법 | 1시간 |
+| 2 | 공문·보고서 초안 실습 | 1시간 |
+
+## 4. 강사 소개
+전경숙 대표: 충남AIXR미래교육총연합회 회장, AI 활용·금융테라피 강사
+
+## 5. 비용
+[확인 필요: 기관 예산 기준]`,
+    web: (o) => `# 사이트 공지사항 (초안)
+
+**관련 지시:** ${o}
+
+**[공지] 11월 AI 활용 특강 수강생 모집**
+
+안녕하세요. 11월 AI 활용 특강 수강생을 모집합니다.
+- 대상: AI를 처음 배우는 누구나
+- 신청: 홈페이지 [교육 신청] 메뉴
+- 문의: [확인 필요: 연락처]
+
+많은 관심 부탁드립니다.`,
+    association: (o) => `# 공문 (초안)
+
+**관련 지시:** ${o}
+
+**충남AIXR미래교육총연합회**
+
+수신: 이사 및 회원 여러분
+제목: 정기 이사회 개최 안내
+
+1. 귀하의 건승을 기원합니다.
+2. 본회 정기 이사회를 아래와 같이 개최하오니 참석하여 주시기 바랍니다.
+   - 일시: [확인 필요]
+   - 장소: [확인 필요]
+   - 안건: 하반기 사업 보고, 내년도 교육사업 계획
+
+**충남AIXR미래교육총연합회 회장 전경숙**`,
+    writer: (o) => `# 칼럼 초안
+
+**관련 지시:** ${o}
+
+## 돈 이야기는 결국 마음 이야기다
+
+상담을 하다 보면 숫자보다 먼저 마음이 보일 때가 있다. "얼마가 필요할까요?"라는 질문 뒤에는 늘 "괜찮을까요?"라는 마음이 숨어 있다.
+
+오늘 아침 필사한 문장이 떠오른다. *"준비된 사람에게 미래는 두려움이 아니라 기대가 된다."*
+
+재무설계는 결국 나다운 삶을 위한 준비다. …(이어서 작성)`,
+    'face-counsel': (o) => `# 상담 기록 정리 (초안)
+
+**관련 지시:** ${o}
+
+| 항목 | 내용 |
+|---|---|
+| 상담 일시 | [날짜] |
+| 상담 주제 | 진로 고민, 대인관계 |
+| AI 분석 참고 | 인상 특징: 부드러운 눈매, 안정된 표정 (참고용) |
+| 대표 해석 | [대표님 작성] |
+| 다음 상담 | 2주 후 |
+
+*AI 분석은 참고 자료이며 의학적·심리 진단이 아닙니다. 해석은 상담사가 합니다.*`,
+  };
+  const generic = (t, e) => `# ${t.title}\n\n**담당:** ${e.emoji} ${e.name} (${e.role})\n\n${t.instructions}\n\n- (체험판 예시 결과물입니다. 실제 앱에서는 이 직원이 지시에 맞춰 직접 작성합니다.)`;
+  const resultFor = (t) => {
+    const e = db.employees.find((x) => x.id === t.employeeId) || { name: '', role: '', emoji: '' };
+    let body = (SAMPLE[t.sampleKey || t.employeeId] || (() => generic(t, e)))(t.orderText);
+    if (t.history.length) body = `> ✏️ 수정 반영 (${t.history.length}차): ${t.history.at(-1).feedback}\n\n${body}`;
+    return `> 🧪 체험판 예시 결과물입니다. 실제 앱에서는 AI 직원이 지시 내용에 맞춰 직접 작성합니다.\n\n${body}`;
+  };
+
+  // ───────── 체험판 초기 상태 (예시 업무가 들어 있는 상태로 시작) ─────────
+  const db = {
+    owner: SEED.OWNER,
+    employees: structuredClone(SEED.EMPLOYEES),
+    knowledge: structuredClone(SEED.KNOWLEDGE),
+    orders: [],
+    tasks: [],
+    briefing: null,
+    settings: { autoBriefing: true, briefingTime: '08:00', notifyReview: true, notifyBriefing: true, notifyWeekly: true, minutesPerTask: 40, slideTheme: 'lavender' },
+    kakao: { configured: true, connected: true, nickname: '전경숙', redirectUri: 'http://localhost:3000/auth/kakao/callback', lastError: null },
+    weeklyReviews: {},
+    google: { configured: true, connected: true, email: 'example@gmail.com', redirectUri: '' },
+    loggedIn: true,
+    password: null,
+  };
+  const addOrder = (text, summary, minAgo, assigns) => {
+    // assigns: [직원, 제목, 상태]
+    const o = { id: uid('o'), text, summary, status: 'assigned', createdAt: ago(minAgo) };
+    db.orders.unshift(o);
+    for (const [employeeId, title, status, sampleKey] of assigns) {
+      const t = { id: uid('t'), orderId: o.id, orderText: text, employeeId, title, instructions: `${title}: 대표 지시에 맞춰 초안 작성`, status, result: '', history: [], error: null, createdAt: ago(minAgo), updatedAt: ago(minAgo - 3), sampleKey };
+      t.result = resultFor(t);
+      if (status === 'done') t.approvedAt = ago(minAgo - 5);
+      db.tasks.unshift(t);
+    }
+  };
+  // 지난 며칠간 처리한 업무 (주간 보고서 예시용)
+  [
+    [6, 'sns', '블로그 글: 연금 3층 구조'], [6, 'exam-writer', 'AI 자격증 예상문제 20개'], [5, 'sns', '아산시 평생학습관 강의 제안서', 'proposal'],
+    [5, 'fin-analyst', '11월 생일 고객 축하 문자', 'crm'], [4, 'lecture-planner', '컬러테라피 특강 교안'], [3, 'web', 'gptstore2 수강 신청 공지'],
+    [3, 'writer', '칼럼: 돈 이야기는 마음 이야기'], [2, 'fin-analyst', '박OO 고객 보장 분석 요약'], [1, 'writer', '상담 리포트 양식', 'face-counsel'],
+    [1, 'sns', '유튜브 쇼츠 대본 3편'],
+  ].forEach(([days, emp, title, sampleKey]) => addOrder(title + ' 해 줘', `${title} 업무를 배정했습니다.`, days * 1440 + 120, [[emp, title, 'done', sampleKey]]));
+  db.tasks.find((t) => t.sampleKey === 'proposal').history.push({ feedback: '비용 항목을 표로 정리해 줘', result: '', at: ago(5 * 1440) });
+  addOrder('충남AIXR 이사회 회의 안내 공문 써 줘', '사이트·협회 운영 담당 한결에게 공문 작성을 배정했습니다.', 180, [['web', '이사회 안내 공문', 'done', 'association']]);
+  addOrder(
+    '이번 달 은퇴설계 세미나 열자. 커리큘럼, 홍보글, 기존 고객 초대 문자 준비해 줘',
+    '세미나 준비를 4개 업무로 나눠 지우, 리아, 재희에게 배정했습니다.',
+    40,
+    [
+      ['lecture-planner', '세미나 커리큘럼', 'review'],
+      ['sns', '세미나 홍보글', 'review'],
+      ['fin-analyst', '고객 초대 문자 3안', 'review', 'crm'],
+      ['fin-analyst', '은퇴자금 예시 계산표', 'done'],
+    ],
+  );
+
+  const EVENTS = [
+    { title: '천안시청 공무원 AI 활용 특강', start: kst(0, 14, 0), end: kst(0, 16, 0), allDay: false, location: '천안시청 대회의실', link: '' },
+    { title: '김OO 고객 은퇴설계 상담', start: kst(0, 17, 30), end: kst(0, 18, 30), allDay: false, location: '재무솔루션연구소', link: '' },
+    { title: '충남AIXR 정기 이사회', start: kstDate(1), end: kstDate(2), allDay: true, location: '', link: '' },
+    { title: '컬러테라피 힐링 특강', start: kst(1, 10, 0), end: kst(1, 12, 0), allDay: false, location: '아산 평생학습관', link: '' },
+  ];
+  const count = (s) => db.tasks.filter((t) => t.status === s).length;
+  const makeBriefing = () => ({
+    text: [
+      `☀️ 좋은 아침입니다, ${db.owner.name} 대표님! 오늘은 강의와 상담이 이어지는 바쁜 하루예요.`,
+      '',
+      '**📅 오늘 일정**',
+      '- 오후 2시 천안시청 공무원 AI 활용 특강 (천안시청 대회의실)',
+      '- 오후 5시 30분 김OO 고객 은퇴설계 상담 → 재희가 만든 **은퇴자금 계산표**를 미리 보시면 좋아요',
+      '',
+      `**📊 업무 현황** 결재 대기 ${count('review')}건 · 작업 중 ${count('working')}건 · 완료 ${count('done')}건`,
+      '',
+      '**✅ 오늘 꼭 처리할 3가지**',
+      '1. 은퇴설계 세미나 커리큘럼 결재 (지우)',
+      '2. 세미나 홍보글 결재 후 인스타 게시 (리아)',
+      '3. 고객 초대 문자 결재 후 발송 (하나)',
+      '',
+      '**💡 제안** 내일 컬러테라피 특강 홍보가 아직 없어요. 리아에게 카드뉴스를 맡겨 보시겠어요?',
+      '',
+      '*(체험판 예시 브리핑입니다)*',
+    ].join('\n'),
+    at: now(),
+    kind: db.briefing ? 'manual' : 'auto',
+  });
+  db.briefing = makeBriefing();
+  db.briefing.at = ago(90);
+
+  // ───────── 업무 처리 흉내 ─────────
+  const work = (t) => {
+    t.status = 'working';
+    t.updatedAt = now();
+    setTimeout(() => {
+      t.result = resultFor(t);
+      t.status = 'review';
+      t.updatedAt = now();
+    }, 1800 + Math.random() * 2500);
+  };
+  const planOrder = (text) => {
+    const scored = db.employees
+      .map((e) => ({ e, s: e.keywords.filter((k) => text.toLowerCase().includes(k.toLowerCase())).length }))
+      .filter((x) => x.s > 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, 4)
+      .map((x) => x.e);
+    return scored.length ? scored : [db.employees.find((e) => e.id === 'sns') || db.employees[0]];
+  };
+
+  const fail = (status, message) => Object.assign(new Error(message), { status });
+  const findTask = (id) => db.tasks.find((t) => t.id === id) || (() => { throw fail(404, '업무를 찾을 수 없습니다.'); })();
+  const need = (v, f) => { if (typeof v !== 'string' || !v.trim()) throw fail(400, `${f}을(를) 입력해 주세요.`); return v.trim(); };
+
+  const routes = [
+    ['GET', /^\/api\/auth\/status$/, () => ({ needsSetup: false, loggedIn: db.loggedIn })],
+    ['POST', /^\/api\/auth\/login$/, (b) => {
+      if (!b.password || b.password.length < 1) throw fail(401, '비밀번호를 입력해 주세요.');
+      db.loggedIn = true;
+      return { ok: true };
+    }],
+    ['POST', /^\/api\/auth\/setup$/, () => ((db.loggedIn = true), { ok: true })],
+    ['POST', /^\/api\/auth\/logout$/, () => ((db.loggedIn = false), { ok: true })],
+    ['POST', /^\/api\/auth\/password$/, (b) => {
+      const err = !b.password || b.password.length < 8 ? '비밀번호는 8자 이상으로 정해 주세요.' : null;
+      if (err) throw fail(400, err);
+      return { ok: true };
+    }],
+    ['GET', /^\/api\/state$/, () => ({
+      demo: true, owner: db.owner, secretary: SEED.SECRETARY, employees: db.employees, knowledge: db.knowledge,
+      orders: db.orders.slice(0, 50), tasks: db.tasks, briefing: db.briefing, settings: db.settings, google: db.google, kakao: db.kakao, themes: THEMES,
+    })],
+    ['POST', /^\/api\/tasks\/([^/]+)\/slides$/, (b, [id]) => {
+      const t = findTask(id);
+      const kind = b.kind === 'cards' ? 'cards' : 'ppt';
+      const data = sampleSlides(t, kind);
+      t.slides = { ...(t.slides || {}), [kind]: { data, at: now() } };
+      return { kind, data };
+    }],
+    ['GET', /^\/api\/report/, (_b, _p, url) => buildReport(Number(new URL(url, 'http://x').searchParams.get('week')) || 0)],
+    ['POST', /^\/api\/report\/review$/, (b) => {
+      const r = buildReport(Number(b.week) || 0);
+      const top = [...r.byEmployee].sort((x, y) => y.done - x.done)[0];
+      db.weeklyReviews[r.key] = {
+        text: [
+          `이번 주 AI 직원들이 **${r.totals.done}건**을 완료해 대표님 시간을 약 **${r.totals.savedHours}시간** 아꼈습니다.`,
+          '',
+          '**잘된 점**',
+          top ? `- ${top.emoji} ${top.name}(${top.role})가 ${top.done}건으로 가장 많이 처리했습니다.` : '- 꾸준히 업무가 처리되었습니다.',
+          '- 강의·홍보·고객관리가 고르게 진행되어 세미나 준비가 순조롭습니다.',
+          '',
+          '**다음 주 제안**',
+          '- 리아(마케팅·제안서)에게 제안서 수정 요청이 있었어요. 업무 지침서에 "비용은 표로 정리"를 추가해 보세요.',
+          `- 결재 대기 ${r.totals.review}건을 월요일 오전에 먼저 처리하시면 홍보 일정이 앞당겨집니다.`,
+          '',
+          '*(체험판 예시 총평입니다)*',
+        ].join('\n'),
+        at: now(),
+      };
+      return buildReport(Number(b.week) || 0);
+    }],
+    ['POST', /^\/api\/kakao\/test$/, () => ({ ok: true })],
+    ['POST', /^\/api\/kakao\/disconnect$/, () => Object.assign(db.kakao, { connected: false, nickname: null })],
+    ['PUT', /^\/api\/settings$/, (b) => Object.assign(db.settings, b)],
+    ['POST', /^\/api\/orders$/, (b) => {
+      const text = need(b.text, '지시 내용');
+      const o = { id: uid('o'), text, summary: '비서실장이 업무를 나누는 중…', status: 'planning', createdAt: now() };
+      db.orders.unshift(o);
+      setTimeout(() => {
+        const picked = planOrder(text);
+        o.summary = `지시를 ${picked.length}개 업무로 나눠 ${picked.map((e) => e.name).join(', ')}에게 배정했습니다.`;
+        o.status = 'assigned';
+        for (const e of picked) {
+          const t = { id: uid('t'), orderId: o.id, orderText: text, employeeId: e.id, title: `${e.role} 업무`, instructions: `대표 지시 "${text}"에 대해 ${e.role} 관점의 결과물 초안 작성`, status: 'working', result: '', history: [], error: null, createdAt: now(), updatedAt: now() };
+          db.tasks.unshift(t);
+          work(t);
+        }
+      }, 1200);
+      return o;
+    }],
+    ['POST', /^\/api\/employees\/([^/]+)\/tasks$/, (b, [id]) => {
+      const e = db.employees.find((x) => x.id === id);
+      const text = need(b.text, '지시 내용');
+      const o = { id: uid('o'), text, summary: `${e.name}에게 직접 지시`, status: 'assigned', createdAt: now() };
+      const t = { id: uid('t'), orderId: o.id, orderText: text, employeeId: id, title: text.slice(0, 24), instructions: text, status: 'working', result: '', history: [], error: null, createdAt: now(), updatedAt: now() };
+      db.orders.unshift(o);
+      db.tasks.unshift(t);
+      work(t);
+      return t;
+    }],
+    ['POST', /^\/api\/tasks\/([^/]+)\/approve$/, (_b, [id]) => Object.assign(findTask(id), { status: 'done', updatedAt: now() })],
+    ['POST', /^\/api\/tasks\/([^/]+)\/revise$/, (b, [id]) => {
+      const t = findTask(id);
+      t.history.push({ feedback: need(b.feedback, '수정 요청 내용'), result: t.result, at: now() });
+      work(t);
+      return t;
+    }],
+    ['POST', /^\/api\/tasks\/([^/]+)\/reject$/, (_b, [id]) => Object.assign(findTask(id), { status: 'rejected', updatedAt: now() })],
+    ['POST', /^\/api\/tasks\/([^/]+)\/retry$/, (_b, [id]) => (work(findTask(id)), findTask(id))],
+    ['DELETE', /^\/api\/tasks\/([^/]+)$/, (_b, [id]) => { db.tasks = db.tasks.filter((t) => t.id !== id); return { ok: true }; }],
+    ['POST', /^\/api\/tasks\/([^/]+)\/gmail-draft$/, (_b, [id]) => { findTask(id).gmailDraftAt = now(); return { id: 'demo', link: 'https://mail.google.com/mail/u/0/#drafts' }; }],
+    ['POST', /^\/api\/tasks\/([^/]+)\/drive$/, (_b, [id]) => { findTask(id).driveLink = ''; return { id: 'demo', webViewLink: '' }; }],
+    ['GET', /^\/api\/calendar$/, () => ({ connected: db.google.connected, events: db.google.connected ? EVENTS : [] })],
+    ['POST', /^\/api\/briefing$/, () => (db.briefing = makeBriefing())],
+    ['POST', /^\/api\/google\/disconnect$/, () => Object.assign(db.google, { connected: false, email: null })],
+    ['POST', /^\/api\/employees$/, (b) => { const e = { id: uid('e'), ...b, keywords: String(b.keywords || '').split(',').map((k) => k.trim()).filter(Boolean) }; db.employees.push(e); return e; }],
+    ['PUT', /^\/api\/employees\/([^/]+)$/, (b, [id]) => Object.assign(db.employees.find((e) => e.id === id), { ...b, keywords: String(b.keywords || '').split(',').map((k) => k.trim()).filter(Boolean) })],
+    ['DELETE', /^\/api\/employees\/([^/]+)$/, (_b, [id]) => { db.employees = db.employees.filter((e) => e.id !== id); return { ok: true }; }],
+    ['POST', /^\/api\/knowledge$/, (b) => { const k = { id: uid('k'), title: need(b.title, '제목'), content: need(b.content, '내용') }; db.knowledge.push(k); return k; }],
+    ['DELETE', /^\/api\/knowledge\/([^/]+)$/, (_b, [id]) => { db.knowledge = db.knowledge.filter((k) => k.id !== id); return { ok: true }; }],
+  ];
+
+  const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
+  window.fetch = async (url, opts = {}) => {
+    const method = opts.method || 'GET';
+    const r = routes.find(([m, re]) => m === method && re.test(url.split('?')[0]));
+    await new Promise((res) => setTimeout(res, 120));
+    if (!r) return json(404, { error: '없는 주소입니다.' });
+    try {
+      const body = opts.body ? JSON.parse(opts.body) : {};
+      return json(200, structuredClone(await r[2](body, url.match(r[1]).slice(1), url)));
+    } catch (err) {
+      return json(err.status || 500, { error: err.message });
+    }
+  };
+
+  // ───────── PPT · 카드뉴스 예시 ─────────
+  function sampleSlides(t, kind) {
+    const sections = [];
+    let cur = null;
+    for (const raw of t.result.split('\n')) {
+      const line = raw.trim().replace(/\*\*/g, '');
+      if (!line || line.startsWith('>') || /^[-|]{3,}/.test(line) || /^\|[\s:|-]+\|$/.test(line)) continue;
+      const h = line.match(/^#{1,4}\s+(.*)/);
+      if (h) { cur = { title: h[1], bullets: [] }; sections.push(cur); continue; }
+      if (!cur) continue;
+      const text = line.replace(/^([-*•]|\d+[.)])\s+/, '').replace(/^\|(.*)\|$/, (_, c) => c.split('|').map((x) => x.trim()).filter(Boolean).join(' · '));
+      if (text && cur.bullets.length < 5) cur.bullets.push(text.slice(0, 70));
+    }
+    const filled = sections.filter((x) => x.bullets.length);
+    if (kind === 'cards') {
+      if (t.employeeId === 'sns') {
+        return {
+          cards: [
+            { headline: '요즘 마음이 무슨 색인가요?', body: '색은 말보다 먼저 마음을 보여 줍니다' },
+            { headline: '나에게 맞는 색으로 쉬어 가는 2시간', body: '컬러테라피 힐링 특강에 초대합니다' },
+            { headline: '이런 분께 추천해요', body: '지친 직장인 · 쉼이 필요한 엄마 · 나를 알고 싶은 분' },
+            { headline: '전경숙 강사와 함께', body: '금융테라피 · 컬러테라피 · AI 활용 강의' },
+            { headline: '신청은 프로필 링크에서 🌈', body: '선착순 20명 · 천안' },
+          ],
+          caption: '오늘 하루, 내 마음의 색을 들여다본 적 있으신가요? 🎨\n함께 쉬어 가는 시간에 초대합니다.\n\n#컬러테라피 #힐링특강 #천안강의 #마음챙김 #나다운삶',
+        };
+      }
+      return { cards: (filled.length ? filled : [{ title: t.title, bullets: [] }]).slice(0, 6).map((x) => ({ headline: x.title.slice(0, 22), body: x.bullets.slice(0, 2).join(' ').slice(0, 70) })), caption: '' };
+    }
+    return { title: t.title, subtitle: `${db.owner.name} ${db.owner.title}`, slides: filled.map((x) => ({ title: x.title, bullets: x.bullets, notes: '' })) };
+  }
+
+  // ───────── 주간 보고서 계산 ─────────
+  function buildReport(offset) {
+    offset = Math.max(-52, Math.min(0, offset));
+    const DAY = 864e5;
+    const today = kstDate(0);
+    const dow = new Date(`${today}T00:00:00Z`).getUTCDay();
+    const from = Date.parse(`${today}T00:00:00+09:00`) - ((dow + 6) % 7) * DAY + offset * 7 * DAY;
+    const to = from + 7 * DAY;
+    const kd = (ms) => new Date(ms + 9 * 3600e3).toISOString().slice(0, 10);
+    const inRange = (iso) => iso && Date.parse(iso) >= from && Date.parse(iso) < to;
+    const per = new Map(db.employees.map((e) => [e.id, { id: e.id, name: e.name, role: e.role, emoji: e.emoji, done: 0, review: 0, rejected: 0, revisions: 0 }]));
+    const totals = { orders: db.orders.filter((o) => inRange(o.createdAt)).length, done: 0, review: 0, rejected: 0, revisions: 0 };
+    const daily = Array.from({ length: 7 }, (_, i) => ({ date: kd(from + i * DAY), done: 0 }));
+    const doneTitles = [];
+    for (const t of db.tasks) {
+      const e = per.get(t.employeeId);
+      const at = t.approvedAt || t.updatedAt;
+      if (t.status === 'done' && inRange(at)) { totals.done++; if (e) e.done++; doneTitles.push(t.title); const d = daily.find((x) => x.date === kd(Date.parse(at))); if (d) d.done++; }
+      if (offset === 0 && t.status === 'review') { totals.review++; if (e) e.review++; }
+      if (t.status === 'rejected' && inRange(t.updatedAt)) { totals.rejected++; if (e) e.rejected++; }
+      const rv = t.history.filter((h) => inRange(h.at)).length;
+      totals.revisions += rv;
+      if (e) e.revisions += rv;
+    }
+    totals.savedHours = Math.round(((totals.done * db.settings.minutesPerTask) / 60) * 10) / 10;
+    const key = kd(from);
+    return { key, offset, from: key, to: kd(to - DAY), totals, daily, byEmployee: [...per.values()].filter((e) => e.done || e.review || e.rejected || e.revisions), doneTitles, minutesPerTask: db.settings.minutesPerTask, review: db.weeklyReviews[key] || null };
+  }
+
+  // Google 연결 버튼: 실제 Google 대신 연결된 것처럼 보여 줌
+  document.addEventListener('click', (ev) => {
+    const a = ev.target.closest('a[href="/auth/google/start"], a[href="/auth/kakao/start"]');
+    if (!a) return;
+    ev.preventDefault();
+    if (a.getAttribute('href').includes('kakao')) {
+      Object.assign(db.kakao, { connected: true, nickname: '전경숙' });
+      window.__demoToast?.('✅ (체험판) 카카오톡을 연결했습니다');
+    } else {
+      Object.assign(db.google, { connected: true, email: 'example@gmail.com' });
+      window.__demoToast?.('✅ (체험판) Google 계정을 연결했습니다');
+    }
+  }, true);
+})();
+
+</script>
+<script type="module">
+// 나의 AI 사무실 — 화면 동작
+const $ = (s) => document.querySelector(s);
+let S = null; // 서버 상태
+const lastSig = {}; // 화면별 마지막 렌더 서명 (입력 중인 글이 지워지지 않도록 바뀐 부분만 다시 그림)
+
+const STATUS = {
+  working: { label: '작업 중', icon: '⏳' },
+  review: { label: '결재 대기', icon: '📥' },
+  done: { label: '완료', icon: '✅' },
+  error: { label: '오류', icon: '⚠️' },
+  rejected: { label: '반려', icon: '🗑️' },
+};
+const EXAMPLES = [
+  '이번 달 은퇴설계 세미나 열자. 커리큘럼, 홍보글, 기존 고객 초대 문자 준비해 줘',
+  'AI 얼굴분석심리상담사 자격증 1급 예상문제 20개 만들어 줘',
+  '충남AIXR 이사회 회의 안내 공문이랑 회원 안내문 써 줘',
+  '컬러테라피 힐링 특강 인스타 홍보 카드뉴스 문구 5장',
+];
+
+// ───────── 서버 통신 ─────────
+async function api(method, url, body) {
+  const res = await fetch(url, { method, headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && !url.startsWith('/api/auth/')) {
+    showAuth(false);
+    throw new Error('로그인이 필요합니다.');
+  }
+  if (!res.ok) throw new Error(data.error || '요청에 실패했습니다.');
+  return data;
+}
+async function refresh() {
+  if (!loggedIn) return;
+  try {
+    S = await api('GET', '/api/state');
+    render();
+  } catch (e) {
+    console.warn(e);
+  }
+}
+function toast(msg) {
+  const t = Object.assign(document.createElement('div'), { className: 'toast', textContent: msg });
+  document.body.append(t);
+  setTimeout(() => t.remove(), 2600);
+}
+async function act(btn, fn, okMsg) {
+  if (btn) btn.disabled = true;
+  try {
+    await fn();
+    if (okMsg) toast(okMsg);
+    await refresh();
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// ───────── 유틸 ─────────
+const esc = (s = '') => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const emp = (id) => S.employees.find((e) => e.id === id) || { name: '퇴사한 직원', emoji: '👤', role: '' };
+const when = (iso) => new Date(iso).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+// 아주 가벼운 마크다운 → HTML (제목, 굵게, 목록, 표, 인용, 코드, 구분선)
+function md(src = '') {
+  const inline = (s) =>
+    esc(s)
+      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replace(/(^|[^*])\*(?!\s)(.+?)\*/g, '$1<i>$2</i>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
+  const lines = src.split('\n');
+  let html = '';
+  let list = null;
+  const closeList = () => { if (list) { html += `</${list}>`; list = null; } };
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (/^\s*\|.*\|\s*$/.test(l) && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] || '')) {
+      closeList();
+      const cells = (r) => r.trim().replace(/^\||\|$/g, '').split('|').map((c) => inline(c.trim()));
+      html += '<table><tr>' + cells(l).map((c) => `<th>${c}</th>`).join('') + '</tr>';
+      i += 2;
+      while (i < lines.length && /^\s*\|.*\|\s*$/.test(lines[i])) html += '<tr>' + cells(lines[i++]).map((c) => `<td>${c}</td>`).join('') + '</tr>';
+      i--;
+      html += '</table>';
+      continue;
+    }
+    let m;
+    if ((m = l.match(/^(#{1,4})\s+(.*)/))) { closeList(); html += `<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`; }
+    else if ((m = l.match(/^\s*[-*•]\s+(.*)/))) { if (list !== 'ul') { closeList(); html += '<ul>'; list = 'ul'; } html += `<li>${inline(m[1])}</li>`; }
+    else if ((m = l.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== 'ol') { closeList(); html += '<ol>'; list = 'ol'; } html += `<li>${inline(m[1])}</li>`; }
+    else if ((m = l.match(/^>\s?(.*)/))) { closeList(); html += `<blockquote>${inline(m[1])}</blockquote>`; }
+    else if (/^\s*(-{3,}|\*{3,})\s*$/.test(l)) { closeList(); html += '<hr>'; }
+    else if (!l.trim()) { closeList(); }
+    else { closeList(); html += `<p>${inline(l)}</p>`; }
+  }
+  closeList();
+  return html;
+}
+
+function download(name, content) {
+  return toast('체험판에서는 파일 저장이 되지 않습니다. 실제 앱에서는 .md 파일로 저장됩니다.');
+  clickLink(URL.createObjectURL(new Blob([content], { type: 'text/markdown;charset=utf-8' })), name);
+}
+
+// ───────── 렌더링 ─────────
+function once(key, sig, fn) {
+  if (lastSig[key] === sig) return;
+  lastSig[key] = sig;
+  fn();
+}
+
+function render() {
+  $('#owner').textContent = `${S.owner.name} ${S.owner.title}`;
+  const mode = $('#mode');
+  mode.textContent = S.demo ? '🧪 체험판' : '🤖 AI 직원 근무 중';
+  mode.classList.toggle('demo', S.demo);
+  const reviewN = S.tasks.filter((t) => t.status === 'review').length;
+  $('#reviewCount').textContent = reviewN || '';
+
+  const taskSig = S.tasks.map((t) => t.id + t.status + t.updatedAt).join();
+  once('home', taskSig + S.orders.map((o) => o.status + o.summary).join() + S.employees.length, renderHome);
+  once('briefing', S.briefing?.at || '', () => { if (S.briefing) { $('#briefing').classList.remove('muted'); $('#briefing').innerHTML = md(S.briefing.text) + `<small class="muted">${when(S.briefing.at)}</small>`; } });
+  once('review', S.tasks.filter((t) => t.status === 'review').map((t) => t.id + t.updatedAt).join() + S.employees.map((e) => e.name).join(), renderReview);
+  once('staff', JSON.stringify(S.employees) + taskSig, renderStaff);
+  once('kb', JSON.stringify(S.knowledge), renderKB);
+  once('settings', JSON.stringify([S.settings, S.google, S.kakao]), () => { renderSettings(); renderKakao(); });
+  once('calendarConn', String(S.google.connected), loadCalendar);
+}
+
+function renderHome() {
+  const count = (s) => S.tasks.filter((t) => t.status === s).length;
+  $('#stats').innerHTML = ['working', 'review', 'done', 'error']
+    .map((s) => `<div class="stat"><b>${count(s)}</b><span>${STATUS[s].icon} ${STATUS[s].label}</span></div>`)
+    .join('');
+  $('#orders').innerHTML =
+    S.orders.slice(0, 5).map((o) => `<li>${o.status === 'planning' ? '<span class="spin">⏳</span> ' : ''}${esc(o.text)}<small>${esc(o.summary || '')} · ${when(o.createdAt)}</small></li>`).join('') ||
+    '<li class="muted">아직 지시한 업무가 없습니다.</li>';
+
+  const cols = [
+    ['working', '⏳ 작업 중'],
+    ['review', '📥 결재 대기'],
+    ['done', '✅ 완료'],
+    ['error', '⚠️ 오류 · 반려'],
+  ];
+  $('#board').innerHTML = cols
+    .map(([s, title]) => {
+      const list = S.tasks.filter((t) => (s === 'error' ? t.status === 'error' || t.status === 'rejected' : t.status === s));
+      return `<div class="col"><h3><span>${title}</span><span class="muted">${list.length}</span></h3>${
+        list.slice(0, 30).map((t) => {
+          const e = emp(t.employeeId);
+          return `<div class="task ${t.status}" data-task="${t.id}"><div>${t.status === 'working' ? '<span class="spin">⏳</span> ' : ''}${esc(t.title)}</div><div class="who">${e.emoji} ${esc(e.name)} · ${esc(e.role)} · ${when(t.updatedAt)}</div></div>`;
+        }).join('') || '<p class="muted">비어 있음</p>'
+      }</div>`;
+    })
+    .join('');
+}
+
+function reviewActions(t) {
+  return `<textarea rows="2" placeholder="수정할 점을 적어 주세요 (예: 더 짧게, 50대 여성 눈높이로)" data-fb="${t.id}"></textarea>
+    <div class="actions">
+      <button class="ok" data-approve="${t.id}">✅ 승인</button>
+      <button data-revise="${t.id}">✏️ 수정 요청</button>
+      <button data-copy="${t.id}">📋 복사</button>
+      <button data-dl="${t.id}">⬇️ 저장(.md)</button>
+      <button data-studio="${t.id}" data-kind="ppt">📊 PPT</button><button data-studio="${t.id}" data-kind="cards">🖼️ 카드뉴스</button>
+      <button class="bad" data-reject="${t.id}">반려</button>
+    </div>`;
+}
+
+function renderReview() {
+  const list = S.tasks.filter((t) => t.status === 'review');
+  $('#reviewList').innerHTML =
+    list.map((t) => {
+      const e = emp(t.employeeId);
+      return `<div class="review-item">
+        <div class="row"><h2>${e.emoji} ${esc(t.title)}</h2><span class="muted">${esc(e.name)} · ${esc(e.role)}${t.history.length ? ` · 수정 ${t.history.length}차` : ''}</span></div>
+        <small class="muted">대표 지시: ${esc(t.orderText)}</small>
+        <div class="md">${md(t.result)}</div>
+        ${reviewActions(t)}
+      </div>`;
+    }).join('') || '<div class="card"><h2>🎉 결재할 업무가 없습니다</h2><p class="muted">대시보드에서 새 업무를 지시해 보세요.</p></div>';
+}
+
+function renderStaff() {
+  $('#org').innerHTML = [S.secretary, ...S.employees]
+    .map((e) => {
+      const isSec = e.id === 'secretary';
+      const active = S.tasks.filter((t) => t.employeeId === e.id && (t.status === 'working' || t.status === 'review')).length;
+      const done = S.tasks.filter((t) => t.employeeId === e.id && t.status === 'done').length;
+      return `<div class="emp">
+        <div class="face">${e.emoji}</div>
+        <div class="dept">${esc(e.dept)}</div>
+        <b>${esc(e.name)} · ${esc(e.role)}</b>
+        <p>${esc(e.guide)}</p>
+        ${isSec ? '<span class="load muted">모든 지시를 받아 분배합니다</span>' : `<span class="load">진행 ${active}건 · 완료 ${done}건</span>
+        <div class="actions"><button data-direct="${e.id}">💬 직접 지시</button><button data-edit="${e.id}">편집</button></div>`}
+      </div>`;
+    })
+    .join('');
+}
+
+function renderKB() {
+  $('#kbList').innerHTML =
+    S.knowledge.map((k) => `<div class="kb"><div class="row"><b>${esc(k.title)}</b><button class="bad ghost" data-delkb="${k.id}">삭제</button></div><pre>${esc(k.content)}</pre></div>`).join('') ||
+    '<p class="muted">아직 저장된 자료가 없습니다.</p>';
+}
+
+// ───────── 모달 ─────────
+const modal = $('#modal');
+function openModal(html) {
+  $('#modalBody').innerHTML = html + '<div style="text-align:right;margin-top:12px"><button data-close>닫기</button></div>';
+  modal.showModal();
+}
+modal.addEventListener('click', (e) => { if (e.target === modal || e.target.closest('[data-close]')) modal.close(); });
+
+function showTask(id) {
+  const t = S.tasks.find((x) => x.id === id);
+  if (!t) return;
+  const e = emp(t.employeeId);
+  const body =
+    t.status === 'working' ? '<p><span class="spin">⏳</span> 작업 중입니다… 잠시만 기다려 주세요.</p>'
+    : t.status === 'error' ? `<p class="err">⚠️ ${esc(t.error)}</p><button class="primary" data-retry="${t.id}">다시 시도</button>`
+    : `<div class="md">${md(t.result)}</div>`;
+  openModal(`<h2>${e.emoji} ${esc(t.title)}</h2>
+    <p class="muted">${esc(e.name)} · ${esc(e.role)} · ${STATUS[t.status].icon} ${STATUS[t.status].label}</p>
+    <details><summary>작업 지시 보기</summary><p><b>대표 지시:</b> ${esc(t.orderText)}</p><p><b>배정 내용:</b> ${esc(t.instructions)}</p>${t.history.map((h, i) => `<p><b>수정 요청 ${i + 1}:</b> ${esc(h.feedback)}</p>`).join('')}</details>
+    ${body}
+    ${t.status === 'review' ? reviewActions(t) : ''}
+    ${t.status === 'done' ? `<div class="actions"><button data-copy="${t.id}">📋 복사</button><button data-dl="${t.id}">⬇️ 저장(.md)</button><button data-studio="${t.id}" data-kind="ppt">📊 PPT</button><button data-studio="${t.id}" data-kind="cards">🖼️ 카드뉴스</button>${
+      S.google.connected ? `<button data-gmail="${t.id}">📧 Gmail 임시보관함</button><button data-drive="${t.id}">📁 Drive에 저장</button>` : ''
+    }</div>${S.google.connected ? '' : '<p class="muted links">⚙️ 설정에서 Google을 연결하면 Gmail 임시보관함·Drive로 바로 보낼 수 있습니다.</p>'}
+    <div class="links">${t.driveLink ? `<a href="${esc(t.driveLink)}" target="_blank" rel="noopener">📁 Drive 문서 열기</a>` : ''}${t.gmailDraftAt ? `<span class="ok-text">📧 Gmail 임시보관함에 저장됨 (${when(t.gmailDraftAt)})</span>` : ''}</div>` : ''}
+    ${t.status !== 'working' ? `<p style="margin-top:12px"><button class="bad ghost" data-deltask="${t.id}">이 업무 삭제</button></p>` : ''}`);
+}
+
+function editEmployee(id) {
+  const e = id ? S.employees.find((x) => x.id === id) : { name: '', role: '', dept: '', emoji: '🙂', guide: '', keywords: [] };
+  openModal(`<h2>${id ? '직원 정보 편집' : '새 AI 직원 채용'}</h2>
+    <form id="empForm" class="stack">
+      <label>이모지 <input name="emoji" value="${esc(e.emoji)}" /></label>
+      <label>이름 <input name="name" value="${esc(e.name)}" placeholder="예: 수아" /></label>
+      <label>부서 <input name="dept" value="${esc(e.dept)}" placeholder="예: 마케팅팀" /></label>
+      <label>직무 <input name="role" value="${esc(e.role)}" placeholder="예: 유튜브 PD" /></label>
+      <label>업무 지침서 (이 직원이 어떻게 일해야 하는지 자세히 적을수록 좋아요)
+        <textarea name="guide" rows="6">${esc(e.guide)}</textarea></label>
+      <label>키워드 (쉼표로 구분, 데모 모드에서 업무 배정에 사용)
+        <input name="keywords" value="${esc(e.keywords.join(', '))}" /></label>
+      <div class="actions"><button class="primary" type="submit">저장</button>${id ? `<button type="button" class="bad" data-delemp="${id}">퇴사 처리</button>` : ''}</div>
+    </form>`);
+  $('#empForm').onsubmit = (ev) => {
+    ev.preventDefault();
+    const data = Object.fromEntries(new FormData(ev.target));
+    act(ev.submitter, async () => {
+      await api(id ? 'PUT' : 'POST', id ? `/api/employees/${id}` : '/api/employees', data);
+      modal.close();
+    }, id ? '저장했습니다' : `${data.name} 직원이 입사했습니다 🎉`);
+  };
+}
+
+function directOrder(id) {
+  const e = emp(id);
+  openModal(`<h2>${e.emoji} ${esc(e.name)}에게 직접 지시</h2>
+    <form id="directForm" class="stack"><textarea name="text" rows="4" placeholder="${esc(e.role)}에게 맡길 일을 적어 주세요"></textarea>
+    <button class="primary" type="submit">지시하기</button></form>`);
+  $('#directForm').onsubmit = (ev) => {
+    ev.preventDefault();
+    act(ev.submitter, async () => {
+      await api('POST', `/api/employees/${id}/tasks`, { text: ev.target.text.value });
+      modal.close();
+    }, `${e.name}에게 지시했습니다`);
+  };
+}
+
+// ───────── 로그인 ─────────
+let loggedIn = false;
+let authMode = 'login';
+let needCode = false;
+function showAuth(setup, codeRequired = false) {
+  loggedIn = false;
+  needCode = setup && codeRequired;
+  $('#authCode').classList.toggle('hidden', !needCode);
+  authMode = setup ? 'setup' : 'login';
+  $('#authScreen').classList.remove('hidden');
+  $('#authTitle').textContent = setup ? '처음 오셨네요! 비밀번호를 정해 주세요' : '나의 AI 사무실';
+  $('#authDesc').textContent = setup ? `이 비밀번호로 대표님만 사무실에 들어올 수 있습니다. (8자 이상)${needCode ? ' 인터넷에 공개된 사무실이라 처음 한 번 설정 코드가 필요합니다.' : ''}` : '대표님 비밀번호를 입력해 주세요.';
+  $('#authPw2').classList.toggle('hidden', !setup);
+  $('#authPw').autocomplete = setup ? 'new-password' : 'current-password';
+  $('#authBtn').textContent = setup ? '시작하기' : '로그인';
+  $('#authErr').textContent = '';
+  $('#authPw').focus();
+}
+async function enter() {
+  loggedIn = true;
+  $('#authScreen').classList.add('hidden');
+  $('#authPw').value = $('#authPw2').value = $('#authCode').value = '';
+  for (const k of Object.keys(lastSig)) delete lastSig[k];
+  await refresh();
+}
+$('#authForm').onsubmit = async (ev) => {
+  ev.preventDefault();
+  const pw = $('#authPw').value;
+  if (authMode === 'setup' && pw !== $('#authPw2').value) return ($('#authErr').textContent = '두 비밀번호가 서로 다릅니다.');
+  $('#authBtn').disabled = true;
+  try {
+    await api('POST', authMode === 'setup' ? '/api/auth/setup' : '/api/auth/login', { password: pw, code: $('#authCode').value });
+    await enter();
+  } catch (e) {
+    $('#authErr').textContent = e.message;
+  } finally {
+    $('#authBtn').disabled = false;
+  }
+};
+
+// ───────── 캘린더 ─────────
+async function loadCalendar() {
+  const box = $('#calendar');
+  if (!S?.google.connected) {
+    box.className = 'muted';
+    box.innerHTML = S?.google.configured
+      ? 'Google 캘린더가 연결되지 않았습니다. <a href="#" data-goto="settings">⚙️ 설정에서 연결</a>하면 오늘·내일 일정이 여기에 나오고 브리핑에도 들어갑니다.'
+      : 'Google 연동을 준비하면 오늘·내일 일정이 여기에 나옵니다. <a href="#" data-goto="settings">⚙️ 설정 안내 보기</a>';
+    return;
+  }
+  try {
+    const { events } = await api('GET', '/api/calendar');
+    const dayKey = (e) => new Date(e.allDay ? e.start + 'T00:00:00+09:00' : e.start).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'short' });
+    const time = (e) => (e.allDay ? '종일' : new Date(e.start).toLocaleTimeString('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit' }));
+    let html = '<ul class="events">';
+    let last = '';
+    for (const e of events) {
+      const d = dayKey(e);
+      if (d !== last) { html += `<li class="day">${esc(d)}</li>`; last = d; }
+      html += `<li><span class="t">${time(e)}</span><span>${e.link ? `<a href="${esc(e.link)}" target="_blank" rel="noopener">${esc(e.title)}</a>` : esc(e.title)}${e.location ? `<small>📍 ${esc(e.location)}</small>` : ''}</span></li>`;
+    }
+    box.className = '';
+    box.innerHTML = events.length ? html + '</ul>' : '<p class="muted">오늘·내일 등록된 일정이 없습니다. 여유로운 하루 되세요 🌿</p>';
+  } catch (e) {
+    box.className = 'err';
+    box.textContent = `일정을 불러오지 못했습니다: ${e.message}`;
+  }
+}
+
+// ───────── 설정 ─────────
+function renderSettings() {
+  const g = S.google;
+  $('#autoBriefing').checked = S.settings.autoBriefing;
+  $('#briefingTime').value = S.settings.briefingTime;
+  if (!g.configured) {
+    $('#googleBox').innerHTML = `<p>Google 캘린더·Gmail·Drive를 쓰려면 <b>한 번만</b> 준비가 필요합니다. (약 10분, 자세한 안내는 README의 "Google 연동 준비" 참고)</p>
+      <ol class="guide">
+        <li><a href="https://console.cloud.google.com/" target="_blank" rel="noopener">Google Cloud 콘솔</a>에서 새 프로젝트 만들기</li>
+        <li><b>API 및 서비스 → 라이브러리</b>에서 Google Calendar API, Gmail API, Google Drive API 사용 설정</li>
+        <li><b>OAuth 동의 화면</b> 만들기 (외부, 테스트 사용자에 내 Gmail 추가)</li>
+        <li><b>사용자 인증 정보 → OAuth 클라이언트 ID</b> (웹 애플리케이션), 승인된 리디렉션 URI에 <code>${esc(g.redirectUri)}</code> 입력</li>
+        <li>받은 클라이언트 ID·보안 비밀을 <code>.env</code>의 <code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>에 넣고 앱 다시 켜기</li>
+      </ol>`;
+  } else if (!g.connected) {
+    $('#googleBox').innerHTML = `<p>Google 계정을 연결하면:</p>
+      <ul><li>📅 대시보드와 아침 브리핑에 <b>오늘·내일 캘린더 일정</b>이 들어갑니다 (읽기만 함)</li>
+      <li>📧 승인한 결과물을 <b>Gmail 임시보관함</b>에 저장합니다 (자동 발송하지 않음)</li>
+      <li>📁 승인한 결과물을 Drive의 <b>"AI 사무실" 폴더</b>에 Google 문서로 저장합니다</li></ul>
+      <a class="btn-link" href="/auth/google/start">Google 계정 연결하기</a>`;
+  } else {
+    $('#googleBox').innerHTML = `<p class="ok-text">✅ 연결됨: <b>${esc(g.email || 'Google 계정')}</b></p>
+      <p class="muted">캘린더 읽기 · Gmail 임시보관함 저장 · Drive "AI 사무실" 폴더 저장 권한을 사용 중입니다.</p>
+      <button class="bad" id="gDisconnect">연결 해제</button>`;
+    $('#gDisconnect').onclick = (ev) => { if (confirm('Google 연결을 해제할까요?')) act(ev.target, () => api('POST', '/api/google/disconnect'), '연결을 해제했습니다'); };
+  }
+}
+$('#briefSettings').onsubmit = (ev) => {
+  ev.preventDefault();
+  act(ev.submitter, () => api('PUT', '/api/settings', { autoBriefing: $('#autoBriefing').checked, briefingTime: $('#briefingTime').value }), '저장했습니다');
+};
+$('#pwForm').onsubmit = (ev) => {
+  ev.preventDefault();
+  if ($('#pwNew').value !== $('#pwNew2').value) return alert('새 비밀번호 두 개가 서로 다릅니다.');
+  act(ev.submitter, async () => {
+    await api('POST', '/api/auth/password', { current: $('#pwCur').value, password: $('#pwNew').value });
+    $('#pwCur').value = $('#pwNew').value = $('#pwNew2').value = '';
+  }, '비밀번호를 바꿨습니다');
+};
+$('#logoutBtn').onclick = async () => {
+  await api('POST', '/api/auth/logout').catch(() => {});
+  showAuth(false);
+};
+$('#calBtn').onclick = () => loadCalendar();
+
+function gmailDraft(id) {
+  const t = S.tasks.find((x) => x.id === id);
+  openModal(`<h2>📧 Gmail 임시보관함에 저장</h2>
+    <p class="muted">메일은 <b>보내지 않고 임시보관함에만</b> 저장됩니다. Gmail에서 확인한 뒤 직접 보내 주세요.</p>
+    <form id="gmailForm" class="stack">
+      <label>받는 사람 (비워 두면 Gmail에서 입력) <input name="to" type="email" placeholder="example@email.com" /></label>
+      <label>제목 <input name="subject" value="${esc(t.title)}" /></label>
+      <button class="primary" type="submit">임시보관함에 저장</button>
+    </form>`);
+  $('#gmailForm').onsubmit = (ev) => {
+    ev.preventDefault();
+    const f = ev.target;
+    act(ev.submitter, async () => {
+      const r = await api('POST', `/api/tasks/${id}/gmail-draft`, { to: f.to.value, subject: f.subject.value, html: md(t.result) });
+      openModal(`<h2>📧 저장했습니다</h2><p>Gmail 임시보관함에서 확인한 뒤 보내 주세요.</p><p><a href="${esc(r.link)}" target="_blank" rel="noopener">Gmail 임시보관함 열기 →</a></p>`);
+    }, '(체험판) 실제 앱에서는 Gmail 임시보관함에 저장됩니다');
+  };
+}
+
+
+// ───────── 파일 받기 ─────────
+async function downloadUrl(url) {
+  return toast('체험판에서는 파일을 받을 수 없습니다. 실제 앱에서는 PowerPoint 파일(.pptx)로 저장됩니다.');
+  const res = await fetch(url);
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    throw new Error(d.error || '파일을 만들지 못했습니다.');
+  }
+  const blob = await res.blob();
+  const m = (res.headers.get('content-disposition') || '').match(/filename\*=UTF-8''([^;]+)/);
+  clickLink(URL.createObjectURL(blob), m ? decodeURIComponent(m[1]) : 'download.pptx');
+}
+function savePng(dataUrl, name) {
+  return toast('체험판에서는 저장되지 않습니다. 실제 앱에서는 PNG 이미지로 저장됩니다.');
+  clickLink(dataUrl, name);
+}
+function clickLink(href, name) {
+  const a = Object.assign(document.createElement('a'), { href, download: name, hidden: true });
+  document.body.append(a);
+  a.click();
+  setTimeout(() => { a.remove(); if (href.startsWith('blob:')) URL.revokeObjectURL(href); }, 2000);
+}
+
+// ───────── 카드뉴스 그림 그리기 (1080×1080 PNG) ─────────
+const CARD_FONT = '"Noto Sans KR", "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
+function wrapLines(g, text, maxW) {
+  const lines = [];
+  for (const para of String(text).split('\n')) {
+    let line = '';
+    for (const word of para.split(/(\s+)/)) {
+      if (g.measureText(line + word).width <= maxW) { line += word; continue; }
+      if (line.trim()) lines.push(line.trim());
+      line = '';
+      for (const ch of word.trimStart()) {
+        if (g.measureText(line + ch).width > maxW) { lines.push(line); line = ''; }
+        line += ch;
+      }
+    }
+    if (line.trim()) lines.push(line.trim());
+  }
+  return lines;
+}
+function fitText(g, text, maxW, maxLines, start, min, weight) {
+  for (let size = start; size >= min; size -= 4) {
+    g.font = `${weight} ${size}px ${CARD_FONT}`;
+    const lines = wrapLines(g, text, maxW);
+    if (lines.length <= maxLines) return { size, lines };
+  }
+  g.font = `${weight} ${min}px ${CARD_FONT}`;
+  const lines = wrapLines(g, text, maxW);
+  return { size: min, lines: lines.slice(0, maxLines).map((l, i) => (i === maxLines - 1 && lines.length > maxLines ? l.slice(0, -1) + '…' : l)) };
+}
+function drawCard(card, i, n, theme, footer) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 1080;
+  const g = c.getContext('2d');
+  const col = (k) => '#' + theme[k];
+  g.fillStyle = col('bg');
+  g.fillRect(0, 0, 1080, 1080);
+  g.fillStyle = col('accent');
+  g.fillRect(90, 110, 130, 16);
+  g.textBaseline = 'top';
+  const h = fitText(g, card.headline, 900, 4, 92, 56, 700);
+  g.fillStyle = col('text');
+  g.font = `700 ${h.size}px ${CARD_FONT}`;
+  let y = 180;
+  for (const l of h.lines) { g.fillText(l, 90, y); y += h.size * 1.3; }
+  if (card.body) {
+    y += 40;
+    const b = fitText(g, card.body, 900, 6, 50, 34, 400);
+    g.fillStyle = col('sub');
+    g.font = `400 ${b.size}px ${CARD_FONT}`;
+    for (const l of b.lines) { if (y > 900) break; g.fillText(l, 90, y); y += b.size * 1.5; }
+  }
+  g.font = `700 30px ${CARD_FONT}`;
+  g.fillStyle = col('accent');
+  g.fillText(footer, 90, 990);
+  g.font = `400 28px ${CARD_FONT}`;
+  g.fillStyle = col('sub');
+  g.textAlign = 'right';
+  g.fillText(`${i + 1} / ${n}`, 990, 992);
+  return c.toDataURL('image/png');
+}
+
+// ───────── PPT · 카드뉴스 스튜디오 ─────────
+function openStudio(id, kind) {
+  const t = S.tasks.find((x) => x.id === id);
+  if (!t) return;
+  const label = kind === 'cards' ? '🖼️ 카드뉴스' : '📊 강의 PPT';
+  const themeOpts = Object.entries(S.themes).map(([k, v]) => `<option value="${k}" ${k === S.settings.slideTheme ? 'selected' : ''}>${esc(v.name)}</option>`).join('');
+  openModal(`<h2>${label} 만들기</h2>
+    <p class="muted">"${esc(t.title)}" 결과물을 ${kind === 'cards' ? '인스타그램용 정사각형 카드' : '강의용 슬라이드'}로 바꿉니다. 비서실이 내용을 나눠 구성하고, 색상은 언제든 바꿀 수 있습니다.</p>
+    <div class="studio-bar">
+      <label>색상 <select id="studioTheme">${themeOpts}</select></label>
+      <button class="primary" id="studioMake">${t.slides?.[kind] ? '다시 구성하기' : '구성 만들기'}</button>
+    </div>
+    <div id="studioOut">${t.slides?.[kind] ? '' : '<p class="muted">[구성 만들기]를 누르면 미리보기가 나옵니다.</p>'}</div>`);
+  let data = t.slides?.[kind]?.data || null;
+  const show = () => {
+    if (!data) return;
+    const theme = $('#studioTheme').value;
+    const th = S.themes[theme];
+    const footer = `${S.owner.name} ${S.owner.title}`;
+    const file = `/api/tasks/${id}/pptx?kind=${kind}&theme=${theme}`;
+    const safe = t.title.replace(/[\\/:*?"<>|]/g, '_');
+    let html = `<div class="actions" style="margin-bottom:10px"><button class="primary" data-pptx="${esc(file)}">⬇️ PowerPoint 파일 받기 (.pptx)</button></div>`;
+    if (kind === 'cards') {
+      html += '<div class="cards-grid">' + data.cards.map((c, i) => `<figure><img alt="${esc(c.headline)}" src="${drawCard(c, i, data.cards.length, th, footer)}" /><a href="#" data-png="${esc(`${safe}_${i + 1}.png`)}">PNG 저장</a></figure>`).join('') + '</div>';
+      if (data.caption) html += `<h3>인스타그램 캡션</h3><div class="caption-box">${esc(data.caption)}</div><div class="actions" style="margin-top:6px"><button id="copyCaption">📋 캡션 복사</button></div>`;
+    } else {
+      html += `<div class="slide-list"><div class="slide-mini"><b>표지 · ${esc(data.title)}</b>${data.subtitle ? `<small>${esc(data.subtitle)}</small>` : ''}</div>` +
+        data.slides.map((sl, i) => `<div class="slide-mini"><b>${i + 2}. ${esc(sl.title)}</b><ul>${sl.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>${sl.notes ? `<small>🎤 ${esc(sl.notes)}</small>` : ''}</div>`).join('') + '</div>';
+    }
+    $('#studioOut').innerHTML = html;
+    const cc = $('#copyCaption');
+    if (cc) cc.onclick = () => navigator.clipboard.writeText(data.caption).then(() => toast('캡션을 복사했습니다'), () => toast('복사하지 못했습니다'));
+  };
+  $('#studioTheme').onchange = show;
+  $('#studioMake').onclick = async (ev) => {
+    const btn = ev.target;
+    btn.disabled = true;
+    $('#studioOut').innerHTML = '<p><span class="spin">⏳</span> 구성하는 중입니다… (30초 정도 걸릴 수 있어요)</p>';
+    try {
+      data = (await api('POST', `/api/tasks/${id}/slides`, { kind })).data;
+      btn.textContent = '다시 구성하기';
+      show();
+      refresh();
+    } catch (e) {
+      $('#studioOut').innerHTML = `<p class="err">${esc(e.message)}</p>`;
+    } finally {
+      btn.disabled = false;
+    }
+  };
+  show();
+}
+
+// ───────── 주간 업무 보고서 ─────────
+let week = 0;
+let report = null;
+async function loadReport() {
+  try {
+    report = await api('GET', `/api/report?week=${week}`);
+    renderReport();
+  } catch (e) {
+    toast(e.message);
+  }
+}
+function renderReport() {
+  const r = report;
+  const T = r.totals;
+  $('#repRange').textContent = `${r.from} (월) ~ ${r.to} (일)${week === 0 ? ' · 이번 주' : week === -1 ? ' · 지난주' : ''}`;
+  $('#repNext').disabled = week === 0;
+  $('#repStats').innerHTML = [
+    ['💬', '지시', T.orders],
+    ['✅', '완료', T.done],
+    ['⏱️', '절약 추정', `${T.savedHours}시간`],
+    ...(week === 0 ? [['📥', '결재 대기', T.review]] : []),
+    ['✏️', '수정 요청', T.revisions],
+    ['🗑️', '반려', T.rejected],
+  ].map(([i, l, v]) => `<div class="stat"><b>${v}</b><span>${i} ${l}</span></div>`).join('');
+  const max = Math.max(1, ...r.daily.map((d) => d.done));
+  const wd = ['월', '화', '수', '목', '금', '토', '일'];
+  $('#repDaily').innerHTML = r.daily.map((d, i) => `<div class="bar" title="${d.date} 완료 ${d.done}건"><b>${d.done || ''}</b><i style="height:${(d.done / max) * 120}px"></i>${wd[i]}</div>`).join('');
+  $('#repTable').innerHTML = `<tr><th>직원</th><th>완료</th>${week === 0 ? '<th>결재 대기</th>' : ''}<th>수정 요청</th><th>반려</th><th>절약(시간)</th></tr>` +
+    (r.byEmployee.map((e) => `<tr><td>${e.emoji} ${esc(e.name)} <span class="muted">${esc(e.role)}</span></td><td>${e.done}</td>${week === 0 ? `<td>${e.review}</td>` : ''}<td>${e.revisions}</td><td>${e.rejected}</td><td>${Math.round((e.done * r.minutesPerTask / 60) * 10) / 10}</td></tr>`).join('') ||
+    `<tr><td colspan="6" class="muted">이 주에는 기록이 없습니다.</td></tr>`);
+  $('#repDone').innerHTML = r.doneTitles.map((x) => `<li>${esc(x)}</li>`).join('') || '<li class="muted">완료한 업무가 없습니다.</li>';
+  const rv = $('#repReview');
+  rv.classList.toggle('muted', !r.review);
+  rv.innerHTML = r.review ? md(r.review.text) + `<small class="muted">${when(r.review.at)}</small>` : '아직 총평이 없습니다. [AI 총평 받기]를 누르면 비서실장이 한 주를 정리해 드립니다. (월요일 아침에는 지난주 총평이 자동으로 만들어집니다)';
+  $('#repReviewBtn').textContent = r.review ? '총평 다시 받기' : 'AI 총평 받기';
+}
+$('#repPrev').onclick = () => { week -= 1; loadReport(); };
+$('#repNext').onclick = () => { if (week < 0) { week += 1; loadReport(); } };
+$('#repReviewBtn').onclick = (ev) => act(ev.target, async () => { report = await api('POST', '/api/report/review', { week }); renderReport(); }, '총평을 받았습니다');
+$('#repDl').onclick = () => {
+  if (!report) return;
+  const r = report;
+  const T = r.totals;
+  const lines = [
+    `# 주간 업무 보고서 (${r.from} ~ ${r.to})`, '',
+    `- 지시 ${T.orders}건 · 완료 ${T.done}건 · 수정 요청 ${T.revisions}회 · 반려 ${T.rejected}건`,
+    `- 절약 추정: 약 ${T.savedHours}시간 (업무 1건당 ${r.minutesPerTask}분 기준)`, '',
+    '## 비서실장 총평', r.review ? r.review.text : '(없음)', '',
+    '## 직원별 실적', '| 직원 | 완료 | 수정 요청 | 반려 |', '|---|---|---|---|',
+    ...r.byEmployee.map((e) => `| ${e.name} (${e.role}) | ${e.done} | ${e.revisions} | ${e.rejected} |`), '',
+    '## 완료한 업무', ...(r.doneTitles.length ? r.doneTitles.map((x) => `- ${x}`) : ['(없음)']),
+  ];
+  download(`주간보고서_${r.from}.md`, lines.join('\n'));
+};
+
+// ───────── 카카오톡 · 알림 설정 ─────────
+function renderKakao() {
+  const k = S.kakao;
+  const box = $('#kakaoBox');
+  if (!k.configured) {
+    box.innerHTML = `<p>결재함 도착, 아침 브리핑, 주간 보고를 <b>대표님 카카오톡(나와의 채팅)</b>으로 받을 수 있습니다. 처음 한 번 준비가 필요합니다. (약 10분, README의 "카카오톡 알림 준비" 참고)</p>
+      <ol class="guide">
+        <li><a href="https://developers.kakao.com/" target="_blank" rel="noopener">카카오 개발자 사이트</a>에 로그인 → <b>내 애플리케이션 → 애플리케이션 추가</b></li>
+        <li><b>플랫폼 → Web</b>에 사이트 도메인 <code>${esc(new URL(k.redirectUri).origin)}</code> 등록</li>
+        <li><b>카카오 로그인</b> 활성화, Redirect URI에 <code>${esc(k.redirectUri)}</code> 등록</li>
+        <li><b>동의항목</b>에서 "카카오톡 메시지 전송"을 <b>선택 동의</b>로 설정</li>
+        <li><b>앱 키</b>의 REST API 키를 <code>.env</code>의 <code>KAKAO_REST_API_KEY</code>에 넣고 앱 다시 켜기</li>
+      </ol>`;
+  } else if (!k.connected) {
+    box.innerHTML = `<p>카카오톡을 연결하면 대표님 <b>나와의 채팅</b>으로 알림이 옵니다. 고객이나 다른 사람에게는 보내지 않습니다.</p>
+      <a class="btn-link" href="/auth/kakao/start">카카오톡 연결하기</a>`;
+  } else {
+    box.innerHTML = `<p class="ok-text">✅ 연결됨${k.nickname ? `: <b>${esc(k.nickname)}</b>` : ''}</p>
+      ${k.lastError ? `<p class="err">최근 전송 실패: ${esc(k.lastError)}</p>` : ''}
+      <div class="actions"><button id="kTest">테스트 메시지 보내기</button><button class="bad" id="kOff">연결 해제</button></div>`;
+    $('#kTest').onclick = (ev) => act(ev.target, () => api('POST', '/api/kakao/test'), '(체험판) 실제 앱에서는 카카오톡으로 테스트 메시지가 갑니다');
+    $('#kOff').onclick = (ev) => { if (confirm('카카오톡 연결을 해제할까요?')) act(ev.target, () => api('POST', '/api/kakao/disconnect'), '연결을 해제했습니다'); };
+  }
+  const s = S.settings;
+  for (const key of ['notifyReview', 'notifyBriefing', 'notifyWeekly']) $('#' + key).checked = s[key];
+  $('#minutesPerTask').value = s.minutesPerTask;
+  $('#slideTheme').innerHTML = Object.entries(S.themes).map(([key, v]) => `<option value="${key}" ${key === s.slideTheme ? 'selected' : ''}>${esc(v.name)}</option>`).join('');
+}
+$('#notifySettings').onsubmit = (ev) => {
+  ev.preventDefault();
+  act(ev.submitter, () => api('PUT', '/api/settings', {
+    notifyReview: $('#notifyReview').checked,
+    notifyBriefing: $('#notifyBriefing').checked,
+    notifyWeekly: $('#notifyWeekly').checked,
+    minutesPerTask: Number($('#minutesPerTask').value),
+    slideTheme: $('#slideTheme').value,
+  }), '저장했습니다');
+};
+
+// ───────── 이벤트 ─────────
+$('#tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-view]');
+  if (!b) return;
+  if (b.dataset.view === 'report') loadReport();
+  document.querySelectorAll('#tabs button').forEach((x) => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.view').forEach((v) => v.classList.toggle('hidden', v.id !== `view-${b.dataset.view}`));
+});
+
+$('#examples').innerHTML = EXAMPLES.map((x, i) => `<button type="button" data-ex="${i}">${esc(x.slice(0, 18))}…</button>`).join('');
+
+$('#orderForm').onsubmit = (ev) => {
+  ev.preventDefault();
+  const text = $('#orderText').value;
+  act(ev.submitter, async () => {
+    await api('POST', '/api/orders', { text });
+    $('#orderText').value = '';
+  }, '비서실장 유니가 업무를 나누고 있습니다');
+};
+$('#briefBtn').onclick = (ev) => act(ev.target, () => api('POST', '/api/briefing'), '브리핑을 받았습니다');
+$('#addEmp').onclick = () => editEmployee(null);
+$('#kbForm').onsubmit = (ev) => {
+  ev.preventDefault();
+  act(ev.submitter, async () => {
+    await api('POST', '/api/knowledge', { title: $('#kbTitle').value, content: $('#kbContent').value });
+    $('#kbTitle').value = $('#kbContent').value = '';
+  }, '지식창고에 저장했습니다');
+};
+
+document.addEventListener('click', (ev) => {
+  const go = ev.target.closest('[data-goto]');
+  if (go) { ev.preventDefault(); modal.close(); document.querySelector(`#tabs [data-view="${go.dataset.goto}"]`).click(); return; }
+  const el = ev.target.closest('[data-studio],[data-png],[data-pptx],[data-gmail],[data-drive],[data-task],[data-approve],[data-revise],[data-reject],[data-retry],[data-copy],[data-dl],[data-direct],[data-edit],[data-delemp],[data-delkb],[data-deltask],[data-ex]');
+  if (!el) return;
+  if (el.tagName === 'A') ev.preventDefault();
+  const d = el.dataset;
+  const task = (id) => S.tasks.find((t) => t.id === id);
+  if (d.ex) $('#orderText').value = EXAMPLES[d.ex];
+  else if (d.task) showTask(d.task);
+  else if (d.approve) act(el, async () => { await api('POST', `/api/tasks/${d.approve}/approve`); modal.close(); }, '승인했습니다 ✅');
+  else if (d.revise) {
+    const fb = el.closest('.review-item, #modalBody').querySelector(`[data-fb="${d.revise}"]`).value;
+    if (!fb.trim()) return alert('수정할 점을 먼저 적어 주세요.');
+    act(el, async () => { await api('POST', `/api/tasks/${d.revise}/revise`, { feedback: fb }); modal.close(); }, '수정 요청을 보냈습니다');
+  } else if (d.reject) { if (confirm('이 결과물을 반려할까요?')) act(el, async () => { await api('POST', `/api/tasks/${d.reject}/reject`); modal.close(); }, '반려했습니다'); }
+  else if (d.retry) act(el, async () => { await api('POST', `/api/tasks/${d.retry}/retry`); modal.close(); }, '다시 시도합니다');
+  else if (d.copy) navigator.clipboard.writeText(task(d.copy).result).then(() => toast('복사했습니다'), () => alert('복사하지 못했습니다.'));
+  else if (d.dl) { const t = task(d.dl); download(`${t.title.replace(/[\\/:*?"<>|]/g, '_')}.md`, t.result); }
+  else if (d.studio) openStudio(d.studio, d.kind);
+  else if (d.png) savePng(el.closest('figure').querySelector('img').src, d.png);
+  else if (d.pptx) act(el, () => downloadUrl(d.pptx));
+  else if (d.gmail) gmailDraft(d.gmail);
+  else if (d.drive) act(el, async () => {
+    const t = task(d.drive);
+    const r = await api('POST', `/api/tasks/${d.drive}/drive`, { html: md(t.result) });
+    openModal(`<h2>📁 Drive에 저장했습니다</h2><p>Google Drive의 <b>"AI 사무실"</b> 폴더에 Google 문서로 저장했습니다.</p>${r.webViewLink ? `<p><a href="${esc(r.webViewLink)}" target="_blank" rel="noopener">문서 열기 →</a></p>` : ''}`);
+  }, '(체험판) 실제 앱에서는 Drive "AI 사무실" 폴더에 저장됩니다');
+  else if (d.direct) directOrder(d.direct);
+  else if (d.edit) editEmployee(d.edit);
+  else if (d.delemp) { if (confirm('이 직원을 퇴사 처리할까요?')) act(el, async () => { await api('DELETE', `/api/employees/${d.delemp}`); modal.close(); }, '퇴사 처리했습니다'); }
+  else if (d.delkb) { if (confirm('이 자료를 삭제할까요?')) act(el, () => api('DELETE', `/api/knowledge/${d.delkb}`)); }
+  else if (d.deltask) { if (confirm('이 업무를 삭제할까요?')) act(el, async () => { await api('DELETE', `/api/tasks/${d.deltask}`); modal.close(); }); }
+});
+
+// Google · 카카오 연결 결과 안내 (?google=... / ?kakao=...)
+const gq = new URLSearchParams(location.search);
+if (gq.has('kakao')) {
+  const msg = {
+    connected: '✅ 카카오톡을 연결했습니다. [테스트 메시지 보내기]로 확인해 보세요',
+    denied: '카카오톡 연결을 취소했습니다',
+    expired: '연결 시간이 지났습니다. 다시 시도해 주세요',
+    'not-configured': '.env 에 KAKAO_REST_API_KEY 를 먼저 넣어 주세요',
+    error: `카카오톡 연결 실패: ${gq.get('msg') || ''}`,
+  }[gq.get('kakao')];
+  if (msg) setTimeout(() => toast(msg), 300);
+  history.replaceState(null, '', '/');
+}
+if (gq.has('google')) {
+  const msg = {
+    connected: '✅ Google 계정을 연결했습니다',
+    denied: 'Google 연결을 취소했습니다',
+    expired: '연결 시간이 지났습니다. 다시 시도해 주세요',
+    'not-configured': '.env 에 Google 클라이언트 정보를 먼저 넣어 주세요',
+    error: `Google 연결 실패: ${gq.get('msg') || ''}`,
+  }[gq.get('google')];
+  if (msg) setTimeout(() => toast(msg), 300);
+  history.replaceState(null, '', '/');
+}
+if (gq.has('google') || gq.has('kakao')) document.querySelector('#tabs [data-view="settings"]').click();
+
+(async () => {
+  const st = await api('GET', '/api/auth/status');
+  if (st.loggedIn) enter();
+  else showAuth(st.needsSetup, st.setupCodeRequired);
+})();
+setInterval(() => { if (!document.hidden) refresh(); }, 3000);
+setInterval(() => { if (!document.hidden && S?.google.connected) loadCalendar(); }, 5 * 60 * 1000);
+
+window.__demoToast = toast;
+
+</script>
+<script>
+// 체험판: [도입 문의하기] → 상담 신청서 작성 → 신청서 복사 → 카카오톡 채널로 보내기
+// 입력한 내용은 방문자 화면에만 있고 어디에도 저장되지 않습니다.
+(() => {
+  const CHANNEL = "https://pf.kakao.com/_xmxdxjQn/chat"; // 카카오톡 채널(또는 상담 페이지) 주소
+  const IS_KAKAO = /kakao\.com/.test(CHANNEL);
+  const $ = (s, el = document) => el.querySelector(s);
+  const dlg = $('#consultModal');
+  const form = $('#consultForm');
+  const done = $('#consultDone');
+  const msgBox = $('#consultMsg');
+
+  $('#consultGo').href = CHANNEL;
+  $('#consultGo').textContent = IS_KAKAO ? '② 카카오톡 채널 열기' : '② 상담 창구 열기';
+  $('#consultHow').textContent = IS_KAKAO
+    ? '신청서를 복사한 뒤 카카오톡 채널을 열어 채팅창에 붙여 넣고 보내 주세요. 확인 후 연락드립니다.'
+    : '신청서를 복사한 뒤 상담 창구를 열어 붙여 넣어 주세요. 확인 후 연락드립니다.';
+
+  function open() {
+    form.hidden = false;
+    done.hidden = true;
+    $('#consultErr').textContent = '';
+    dlg.showModal();
+    $('#cName').focus();
+  }
+  document.querySelectorAll('[data-consult]').forEach((b) => b.addEventListener('click', open));
+  dlg.addEventListener('click', (e) => {
+    if (e.target === dlg || e.target.closest('[data-consult-close]')) dlg.close();
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = new FormData(form);
+    const name = String(f.get('name') || '').trim();
+    const contact = String(f.get('contact') || '').trim();
+    const interests = f.getAll('interest').map(String);
+    if (!name || !contact) return ($('#consultErr').textContent = '이름과 연락처를 적어 주세요.');
+    if (!interests.length) return ($('#consultErr').textContent = '관심 분야를 하나 이상 골라 주세요.');
+    if (!f.get('agree')) return ($('#consultErr').textContent = '상담을 위한 개인정보 수집·이용에 동의해 주세요.');
+    const lines = [
+      '[AI 직원 사무실 도입 상담 신청]',
+      `이름: ${name}`,
+      `연락처: ${contact}`,
+      `관심 분야: ${interests.join(', ')}`,
+      f.get('biz') ? `하시는 일: ${String(f.get('biz')).trim()}` : '',
+      f.get('time') ? `희망 상담 시간: ${String(f.get('time')).trim()}` : '',
+      f.get('memo') ? `문의 내용: ${String(f.get('memo')).trim()}` : '',
+    ].filter(Boolean);
+    msgBox.value = lines.join('\n');
+    form.hidden = true;
+    done.hidden = false;
+    $('#consultCopy').focus();
+  });
+
+  $('#consultCopy').addEventListener('click', () => {
+    const ok = () => (($('#consultCopied').textContent = '✅ 복사했습니다. 이제 ②를 눌러 붙여 넣어 주세요.'));
+    navigator.clipboard?.writeText(msgBox.value).then(ok, () => {
+      msgBox.focus();
+      msgBox.select();
+      $('#consultCopied').textContent = '복사가 막혀 있어요. 위 글이 선택되었으니 길게 눌러(또는 Ctrl+C) 복사해 주세요.';
+    }) ?? (msgBox.select(), ($('#consultCopied').textContent = '위 글을 길게 눌러(또는 Ctrl+C) 복사해 주세요.'));
+  });
+  $('#consultBack').addEventListener('click', () => {
+    done.hidden = true;
+    form.hidden = false;
+  });
+})();
+
+</script>
+
+</body>
+</html>
