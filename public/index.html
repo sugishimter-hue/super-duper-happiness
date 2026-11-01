@@ -30,6 +30,7 @@
     <button data-view="home" class="on">🏠 대시보드</button>
     <button data-view="review">✅ 결재함 <span id="reviewCount" class="pill"></span></button>
     <button data-view="staff">👥 직원 관리</button>
+    <button data-view="report">📈 주간 보고</button>
     <button data-view="kb">📚 지식창고</button>
     <button data-view="settings">⚙️ 설정</button>
   </nav>
@@ -94,11 +95,62 @@
       <div id="kbList"></div>
     </section>
 
+    <!-- 주간 보고 -->
+    <section id="view-report" class="view hidden">
+      <div class="row report-head">
+        <div>
+          <h2>📈 주간 업무 보고서</h2>
+          <p id="repRange" class="muted"></p>
+        </div>
+        <div class="actions">
+          <button id="repPrev">◀ 이전 주</button>
+          <button id="repNext">다음 주 ▶</button>
+          <button id="repDl">⬇️ 저장(.md)</button>
+        </div>
+      </div>
+      <div class="stats rep-stats" id="repStats"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="row"><h2>🤵 비서실장 총평</h2><button id="repReviewBtn" class="ghost">AI 총평 받기</button></div>
+          <div id="repReview" class="md muted"></div>
+        </div>
+        <div class="card">
+          <h2>📆 요일별 완료</h2>
+          <div id="repDaily" class="bars"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>👥 직원별 실적</h2>
+        <div class="table-wrap"><table class="rep-table" id="repTable"></table></div>
+      </div>
+      <div class="card">
+        <h2>✅ 이번 주 완료한 업무</h2>
+        <ul id="repDone" class="orders"></ul>
+      </div>
+    </section>
+
     <!-- 설정 -->
     <section id="view-settings" class="view hidden">
       <div class="card">
         <h2>🔗 Google 연동</h2>
         <div id="googleBox"></div>
+      </div>
+      <div class="card">
+        <h2>💬 카카오톡 알림</h2>
+        <div id="kakaoBox"></div>
+      </div>
+      <div class="card">
+        <h2>🔔 알림 · 보고서 · 디자인</h2>
+        <form id="notifySettings" class="stack">
+          <label class="switch"><input type="checkbox" id="notifyReview" /> 결과물이 결재함에 도착하면 카톡 알림</label>
+          <label class="switch"><input type="checkbox" id="notifyBriefing" /> 아침 자동 브리핑을 카톡으로 받기</label>
+          <label class="switch"><input type="checkbox" id="notifyWeekly" /> 월요일 아침 지난주 업무 보고를 카톡으로 받기</label>
+          <div class="settings-row">
+            <label>업무 1건당 절약 시간(분) <input type="number" id="minutesPerTask" min="1" max="600" class="num" /></label>
+            <label>PPT·카드뉴스 기본 색상 <select id="slideTheme"></select></label>
+          </div>
+          <div><button class="primary" type="submit">저장</button></div>
+        </form>
       </div>
       <div class="card">
         <h2>☀️ 아침 자동 브리핑</h2>

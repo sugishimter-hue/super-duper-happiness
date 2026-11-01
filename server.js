@@ -12,6 +12,8 @@ const { db, save, uid, now } = await import('./src/store.js');
 const ai = await import('./src/ai.js');
 const auth = await import('./src/auth.js');
 const google = await import('./src/google.js');
+const kakao = await import('./src/kakao.js');
+const slides = await import('./src/slides.js');
 const { SECRETARY } = await import('./src/seed.js');
 
 // 비밀번호를 잊었을 때: npm run reset-password
@@ -41,6 +43,7 @@ async function runTask(task) {
     if (!employee) throw new Error('담당 직원이 삭제되었습니다. 다른 직원에게 다시 지시해 주세요.');
     task.result = await ai.doTask(task, employee, ctx());
     task.status = 'review';
+    queueReviewNotice(task, employee);
   } catch (err) {
     task.status = 'error';
     task.error = err.message;
@@ -113,9 +116,11 @@ async function briefingTick() {
   if (autoFailedDate === today) return; // 오늘 실패했으면 반복 시도하지 않음 (요금 낭비 방지)
   if (seoulHHMM() < s.briefingTime) return;
   try {
-    await makeBriefing('auto');
+    const b = await makeBriefing('auto');
     db.autoBriefingDate = today;
     save();
+    if (db.settings.notifyBriefing) notify(`☀️ 오늘의 브리핑\n\n${plain(b.text)}`, '브리핑 보기');
+    if (db.settings.notifyWeekly && isMonday()) weeklyAuto();
     console.log(`☀️  ${today} 아침 브리핑을 자동으로 만들었습니다.`);
   } catch (err) {
     autoFailedDate = today;
@@ -186,6 +191,8 @@ route('GET', '/api/state', () => ({
   briefing: db.briefing,
   settings: db.settings,
   google: google.status(),
+  kakao: kakao.status(),
+  themes: slides.THEMES,
 }));
 
 // ── 설정 ──
@@ -196,6 +203,13 @@ route('PUT', '/api/settings', (body) => {
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(body.briefingTime)) throw fail(400, '시간 형식이 올바르지 않습니다 (예: 08:00).');
     s.briefingTime = body.briefingTime;
   }
+  for (const key of ['notifyReview', 'notifyBriefing', 'notifyWeekly']) if (key in body) s[key] = Boolean(body[key]);
+  if ('minutesPerTask' in body) {
+    const m = Number(body.minutesPerTask);
+    if (!Number.isFinite(m) || m < 1 || m > 600) throw fail(400, '업무 1건당 절약 시간은 1~600분 사이로 적어 주세요.');
+    s.minutesPerTask = Math.round(m);
+  }
+  if ('slideTheme' in body && slides.THEMES[body.slideTheme]) s.slideTheme = body.slideTheme;
   db.settings = s;
   save();
   return s;
@@ -228,7 +242,7 @@ route('POST', '/api/employees/:id/tasks', (body, [id]) => {
 route('POST', '/api/tasks/:id/approve', (_b, [id]) => {
   const t = findTask(id);
   if (t.status !== 'review') throw fail(409, '결재 대기 중인 업무만 승인할 수 있습니다.');
-  Object.assign(t, { status: 'done', updatedAt: now() });
+  Object.assign(t, { status: 'done', approvedAt: now(), updatedAt: now() });
   save();
   return t;
 });
@@ -343,6 +357,192 @@ route('DELETE', '/api/knowledge/:id', (_b, [id]) => {
   return { ok: true };
 });
 
+// ───────────── 카카오톡 알림 ─────────────
+// 마크다운을 카톡용 일반 글자로
+function plain(md) {
+  return String(md)
+    .replace(/\*\*|__|`/g, '')
+    .replace(/^#{1,4}\s+/gm, '')
+    .replace(/^>\s?/gm, '')
+    .replace(/^\s*[-*]\s+/gm, '• ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function notify(text, buttonTitle) {
+  if (!kakao.connected()) return;
+  kakao.sendToMe(text, { buttonTitle }).catch((err) => console.error('카카오톡 알림 실패:', err.message));
+}
+
+// 결과물이 연달아 도착하면 모아서 한 번에 알림 (기본 1분)
+const NOTIFY_DELAY = Number(process.env.NOTIFY_DELAY_MS) || 60_000;
+let reviewQueue = [];
+let reviewTimer = null;
+function queueReviewNotice(task, employee) {
+  if (!db.settings.notifyReview || !kakao.connected()) return;
+  reviewQueue.push(`• ${task.title} (${employee.name})`);
+  clearTimeout(reviewTimer);
+  reviewTimer = setTimeout(() => {
+    const items = reviewQueue;
+    reviewQueue = [];
+    notify(`📥 결재함에 ${items.length}건이 도착했습니다\n\n${items.slice(0, 6).join('\n')}${items.length > 6 ? `\n외 ${items.length - 6}건` : ''}`, '결재하러 가기');
+  }, NOTIFY_DELAY);
+}
+
+route('POST', '/api/kakao/test', async () => {
+  await kakao.sendToMe('🏢 AI 사무실 알림 테스트입니다. 이 메시지가 보이면 카카오톡 알림이 잘 연결된 것입니다 😊');
+  return { ok: true };
+});
+route('POST', '/api/kakao/disconnect', async () => {
+  await kakao.disconnect();
+  return kakao.status();
+});
+
+// ───────────── PPT · 카드뉴스 ─────────────
+class FileReply {
+  constructor(data, name, type) {
+    Object.assign(this, { data, name, type });
+  }
+}
+const KINDS = ['ppt', 'cards'];
+const slideReady = (id) => {
+  const t = findTask(id);
+  if (t.status !== 'review' && t.status !== 'done') throw fail(409, '결과물이 완성된 업무만 PPT·카드뉴스로 만들 수 있습니다.');
+  return t;
+};
+
+// 슬라이드 구성 만들기 (AI) → 미리보기용으로 저장
+route('POST', '/api/tasks/:id/slides', async (body, [id]) => {
+  const t = slideReady(id);
+  const kind = KINDS.includes(body.kind) ? body.kind : 'ppt';
+  const data = await ai.toSlides(t, kind, ctx());
+  t.slides = { ...(t.slides || {}), [kind]: { data, resultAt: t.updatedAt, at: now() } };
+  save();
+  return { kind, data };
+});
+
+// 파일 받기
+route('GET', '/api/tasks/:id/pptx', (_b, [id], req) => {
+  const t = slideReady(id);
+  const q = new URL(req.url, 'http://x').searchParams;
+  const kind = KINDS.includes(q.get('kind')) ? q.get('kind') : 'ppt';
+  const saved = t.slides?.[kind];
+  if (!saved) throw fail(409, '먼저 미리보기를 만들어 주세요.');
+  const theme = slides.THEMES[q.get('theme')] ? q.get('theme') : db.settings.slideTheme;
+  const footer = `${db.owner.name} ${db.owner.title}`;
+  return slides.buildPptx(kind, saved.data, theme, footer).then((buf) => {
+    const safe = t.title.replace(/[\\/:*?"<>|]/g, '_');
+    return new FileReply(buf, `${safe}_${kind === 'cards' ? '카드뉴스' : '강의자료'}.pptx`, 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
+  });
+});
+
+// ───────────── 주간 업무 보고서 ─────────────
+const DAY = 864e5;
+function weekRange(offset = 0) {
+  const today = google.seoulDate(0);
+  const dow = new Date(`${today}T00:00:00Z`).getUTCDay(); // 0=일
+  const monday = new Date(Date.parse(`${today}T00:00:00+09:00`) - ((dow + 6) % 7) * DAY + offset * 7 * DAY);
+  const from = monday.getTime();
+  const to = from + 7 * DAY;
+  return { from, to, key: google.seoulDate(0, monday), label: [google.seoulDate(0, monday), google.seoulDate(0, new Date(to - DAY))] };
+}
+const isMonday = () => new Date(`${google.seoulDate(0)}T00:00:00Z`).getUTCDay() === 1;
+
+function buildReport(offset = 0) {
+  const { from, to, key, label } = weekRange(offset);
+  const inRange = (iso) => iso && Date.parse(iso) >= from && Date.parse(iso) < to;
+  const current = offset === 0;
+  const per = new Map(db.employees.map((e) => [e.id, { id: e.id, name: e.name, role: e.role, emoji: e.emoji, done: 0, review: 0, rejected: 0, revisions: 0 }]));
+  const totals = { orders: db.orders.filter((o) => inRange(o.createdAt)).length, done: 0, review: 0, rejected: 0, revisions: 0 };
+  const doneTitles = [];
+  const daily = Array.from({ length: 7 }, (_, i) => ({ date: google.seoulDate(0, new Date(from + i * DAY)), done: 0 }));
+  for (const t of db.tasks) {
+    const e = per.get(t.employeeId);
+    const doneAt = t.approvedAt || t.updatedAt;
+    if (t.status === 'done' && inRange(doneAt)) {
+      totals.done++;
+      if (e) e.done++;
+      doneTitles.push(t.title);
+      const d = daily.find((x) => x.date === google.seoulDate(0, new Date(doneAt)));
+      if (d) d.done++;
+    }
+    if (current && t.status === 'review') {
+      totals.review++;
+      if (e) e.review++;
+    }
+    if (t.status === 'rejected' && inRange(t.updatedAt)) {
+      totals.rejected++;
+      if (e) e.rejected++;
+    }
+    const revs = (t.history || []).filter((h) => inRange(h.at)).length;
+    totals.revisions += revs;
+    if (e) e.revisions += revs;
+  }
+  totals.savedHours = Math.round(((totals.done * db.settings.minutesPerTask) / 60) * 10) / 10;
+  return {
+    key,
+    offset,
+    from: label[0],
+    to: label[1],
+    totals,
+    daily,
+    byEmployee: [...per.values()].filter((e) => e.done || e.review || e.rejected || e.revisions),
+    doneTitles,
+    minutesPerTask: db.settings.minutesPerTask,
+    review: db.weeklyReviews?.[key] || null,
+  };
+}
+
+route('GET', '/api/report', (_b, _p, req) => {
+  const offset = Math.max(-52, Math.min(0, Number(new URL(req.url, 'http://x').searchParams.get('week')) || 0));
+  return buildReport(offset);
+});
+route('POST', '/api/report/review', async (body) => {
+  const offset = Math.max(-52, Math.min(0, Number(body.week) || 0));
+  const report = buildReport(offset);
+  const text = await ai.weeklyReview(report, ctx());
+  db.weeklyReviews = { ...(db.weeklyReviews || {}), [report.key]: { text, at: now() } };
+  save();
+  return buildReport(offset);
+});
+
+// 월요일 아침: 지난주 보고서 총평을 만들고 카톡으로 알림
+let weeklyRunning = false;
+async function weeklyAuto() {
+  const last = buildReport(-1);
+  if (weeklyRunning || db.weeklyReviews?.[last.key]) return;
+  weeklyRunning = true;
+  try {
+    const text = await ai.weeklyReview(last, ctx());
+    db.weeklyReviews = { ...(db.weeklyReviews || {}), [last.key]: { text, at: now() } };
+    save();
+    notify(`📈 지난주 업무 보고 (${last.from} ~ ${last.to})\n완료 ${last.totals.done}건 · 절약 약 ${last.totals.savedHours}시간\n\n${plain(text)}`, '보고서 보기');
+  } catch (err) {
+    console.error('주간 보고서 자동 생성 실패:', err.message);
+  } finally {
+    weeklyRunning = false;
+  }
+}
+
+// ───────────── 카카오 OAuth (브라우저 이동) ─────────────
+async function handleKakaoAuth(url, req, res) {
+  if (!auth.isLoggedIn(req)) return redirect(res, '/');
+  if (url.pathname === '/auth/kakao/start') {
+    if (!kakao.configured()) return redirect(res, '/?kakao=not-configured');
+    return redirect(res, kakao.authUrl());
+  }
+  const q = url.searchParams;
+  if (q.get('error')) return redirect(res, '/?kakao=denied');
+  if (!kakao.takeState(q.get('state') || '')) return redirect(res, '/?kakao=expired');
+  try {
+    await kakao.finishConnect(q.get('code') || '');
+    redirect(res, '/?kakao=connected');
+  } catch (err) {
+    console.error('카카오 연결 실패:', err.message);
+    redirect(res, `/?kakao=error&msg=${encodeURIComponent(err.message)}`);
+  }
+}
+
 // ───────────── Google OAuth (브라우저 이동) ─────────────
 function redirect(res, to) {
   res.writeHead(302, { location: to }).end();
@@ -402,6 +602,12 @@ const server = http.createServer(async (req, res) => {
   for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.setHeader(k, v);
   const url = new URL(req.url, 'http://localhost');
 
+  if (url.pathname === '/auth/kakao/start' || url.pathname === '/auth/kakao/callback') {
+    return handleKakaoAuth(url, req, res).catch((err) => {
+      console.error(err);
+      res.writeHead(500).end('오류가 발생했습니다.');
+    });
+  }
   if (url.pathname === '/auth/google/start' || url.pathname === '/auth/google/callback') {
     return handleGoogleAuth(url, req, res).catch((err) => {
       console.error(err);
@@ -417,6 +623,14 @@ const server = http.createServer(async (req, res) => {
       if (!r.public && !auth.isLoggedIn(req)) throw fail(401, '로그인이 필요합니다.');
       const params = url.pathname.match(r.re).slice(1).map(decodeURIComponent);
       const out = await r.handler(await readBody(req), params, req, res);
+      if (out instanceof FileReply) {
+        res.writeHead(200, {
+          'content-type': out.type,
+          'content-disposition': `attachment; filename="file${path.extname(out.name)}"; filename*=UTF-8''${encodeURIComponent(out.name)}`,
+          'cache-control': 'no-store',
+        });
+        return res.end(out.data);
+      }
       res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' }).end(JSON.stringify(out));
     } catch (err) {
       if (!err.status) console.error(err);
@@ -443,6 +657,7 @@ server.listen(PORT, () => {
   console.log(`\n🏢 AI 사무실이 열렸습니다 → ${google.appUrl()}`);
   console.log(ai.DEMO ? '🧪 데모 모드: 예시 결과물로 동작합니다.' : '🤖 Claude 연결됨: AI 직원들이 실제로 일합니다.');
   console.log(google.configured() ? `🔗 Google 연동 준비됨${google.connected() ? ` (${db.google.email || '연결됨'})` : ' (앱의 [설정]에서 연결하세요)'}` : '🔗 Google 연동: .env 에 GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET 를 넣으면 사용할 수 있습니다.');
+  console.log(kakao.configured() ? `💬 카카오톡 알림 준비됨${kakao.connected() ? ' (연결됨)' : ' (앱의 [설정]에서 연결하세요)'}` : '💬 카카오톡 알림: .env 에 KAKAO_REST_API_KEY 를 넣으면 사용할 수 있습니다.');
   console.log(auth.needsSetup() ? '🔐 처음 실행입니다. 브라우저에서 비밀번호를 정해 주세요.\n' : '');
   setInterval(briefingTick, 30_000);
   briefingTick();

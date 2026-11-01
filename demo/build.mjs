@@ -12,6 +12,7 @@ const must = (s, a, b) => {
 };
 
 const seed = await import(path.join(root, 'src/seed.js'));
+const { THEMES } = await import(path.join(root, 'src/slides.js'));
 const SEED = JSON.stringify({ OWNER: seed.OWNER, SECRETARY: seed.SECRETARY, EMPLOYEES: seed.EMPLOYEES, KNOWLEDGE: seed.KNOWLEDGE });
 
 // ── HTML 본문 ──
@@ -49,10 +50,13 @@ js = must(
 );
 js = must(js, "'Gmail 임시보관함에 저장했습니다'", "'(체험판) 실제 앱에서는 Gmail 임시보관함에 저장됩니다'");
 js = must(js, `'Drive "AI 사무실" 폴더에 저장했습니다'`, `'(체험판) 실제 앱에서는 Drive "AI 사무실" 폴더에 저장됩니다'`);
+js = must(js, 'async function downloadUrl(url) {', "async function downloadUrl(url) {\n  return toast('체험판에서는 파일을 받을 수 없습니다. 실제 앱에서는 PowerPoint 파일(.pptx)로 저장됩니다.');");
+js = must(js, 'function savePng(dataUrl, name) {', "function savePng(dataUrl, name) {\n  return toast('체험판에서는 저장되지 않습니다. 실제 앱에서는 PNG 이미지로 저장됩니다.');");
+js = must(js, "'카카오톡을 확인해 보세요'", "'(체험판) 실제 앱에서는 카카오톡으로 테스트 메시지가 갑니다'");
 js = js.replace(/^export /gm, '');
 js += '\nwindow.__demoToast = toast;\n';
 
-const mock = read('demo/mock.js').replace('__SEED__', SEED);
+const mock = read('demo/mock.js').replace('__SEED__', SEED).replace('__THEMES__', JSON.stringify(THEMES));
 // 보기 화면에서는 alert/confirm 창이 뜨지 않으므로 토스트와 '예'로 대체
 const shim = `window.alert = (m) => window.__demoToast ? window.__demoToast(m) : console.log(m);\nwindow.confirm = () => true;`;
 

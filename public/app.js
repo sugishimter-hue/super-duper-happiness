@@ -97,9 +97,7 @@ function md(src = '') {
 }
 
 function download(name, content) {
-  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([content], { type: 'text/markdown;charset=utf-8' })), download: name });
-  a.click();
-  URL.revokeObjectURL(a.href);
+  clickLink(URL.createObjectURL(new Blob([content], { type: 'text/markdown;charset=utf-8' })), name);
 }
 
 // ───────── 렌더링 ─────────
@@ -123,7 +121,7 @@ function render() {
   once('review', S.tasks.filter((t) => t.status === 'review').map((t) => t.id + t.updatedAt).join() + S.employees.map((e) => e.name).join(), renderReview);
   once('staff', JSON.stringify(S.employees) + taskSig, renderStaff);
   once('kb', JSON.stringify(S.knowledge), renderKB);
-  once('settings', JSON.stringify([S.settings, S.google]), renderSettings);
+  once('settings', JSON.stringify([S.settings, S.google, S.kakao]), () => { renderSettings(); renderKakao(); });
   once('calendarConn', String(S.google.connected), loadCalendar);
 }
 
@@ -162,6 +160,7 @@ function reviewActions(t) {
       <button data-revise="${t.id}">✏️ 수정 요청</button>
       <button data-copy="${t.id}">📋 복사</button>
       <button data-dl="${t.id}">⬇️ 저장(.md)</button>
+      <button data-studio="${t.id}" data-kind="ppt">📊 PPT</button><button data-studio="${t.id}" data-kind="cards">🖼️ 카드뉴스</button>
       <button class="bad" data-reject="${t.id}">반려</button>
     </div>`;
 }
@@ -225,7 +224,7 @@ function showTask(id) {
     <details><summary>작업 지시 보기</summary><p><b>대표 지시:</b> ${esc(t.orderText)}</p><p><b>배정 내용:</b> ${esc(t.instructions)}</p>${t.history.map((h, i) => `<p><b>수정 요청 ${i + 1}:</b> ${esc(h.feedback)}</p>`).join('')}</details>
     ${body}
     ${t.status === 'review' ? reviewActions(t) : ''}
-    ${t.status === 'done' ? `<div class="actions"><button data-copy="${t.id}">📋 복사</button><button data-dl="${t.id}">⬇️ 저장(.md)</button>${
+    ${t.status === 'done' ? `<div class="actions"><button data-copy="${t.id}">📋 복사</button><button data-dl="${t.id}">⬇️ 저장(.md)</button><button data-studio="${t.id}" data-kind="ppt">📊 PPT</button><button data-studio="${t.id}" data-kind="cards">🖼️ 카드뉴스</button>${
       S.google.connected ? `<button data-gmail="${t.id}">📧 Gmail 임시보관함</button><button data-drive="${t.id}">📁 Drive에 저장</button>` : ''
     }</div>${S.google.connected ? '' : '<p class="muted links">⚙️ 설정에서 Google을 연결하면 Gmail 임시보관함·Drive로 바로 보낼 수 있습니다.</p>'}
     <div class="links">${t.driveLink ? `<a href="${esc(t.driveLink)}" target="_blank" rel="noopener">📁 Drive 문서 열기</a>` : ''}${t.gmailDraftAt ? `<span class="ok-text">📧 Gmail 임시보관함에 저장됨 (${when(t.gmailDraftAt)})</span>` : ''}</div>` : ''}
@@ -400,10 +399,240 @@ function gmailDraft(id) {
   };
 }
 
+
+// ───────── 파일 받기 ─────────
+async function downloadUrl(url) {
+  const res = await fetch(url);
+  if (!res.ok) {
+    const d = await res.json().catch(() => ({}));
+    throw new Error(d.error || '파일을 만들지 못했습니다.');
+  }
+  const blob = await res.blob();
+  const m = (res.headers.get('content-disposition') || '').match(/filename\*=UTF-8''([^;]+)/);
+  clickLink(URL.createObjectURL(blob), m ? decodeURIComponent(m[1]) : 'download.pptx');
+}
+function savePng(dataUrl, name) {
+  clickLink(dataUrl, name);
+}
+function clickLink(href, name) {
+  const a = Object.assign(document.createElement('a'), { href, download: name, hidden: true });
+  document.body.append(a);
+  a.click();
+  setTimeout(() => { a.remove(); if (href.startsWith('blob:')) URL.revokeObjectURL(href); }, 2000);
+}
+
+// ───────── 카드뉴스 그림 그리기 (1080×1080 PNG) ─────────
+const CARD_FONT = '"Noto Sans KR", "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
+function wrapLines(g, text, maxW) {
+  const lines = [];
+  for (const para of String(text).split('\n')) {
+    let line = '';
+    for (const word of para.split(/(\s+)/)) {
+      if (g.measureText(line + word).width <= maxW) { line += word; continue; }
+      if (line.trim()) lines.push(line.trim());
+      line = '';
+      for (const ch of word.trimStart()) {
+        if (g.measureText(line + ch).width > maxW) { lines.push(line); line = ''; }
+        line += ch;
+      }
+    }
+    if (line.trim()) lines.push(line.trim());
+  }
+  return lines;
+}
+function fitText(g, text, maxW, maxLines, start, min, weight) {
+  for (let size = start; size >= min; size -= 4) {
+    g.font = `${weight} ${size}px ${CARD_FONT}`;
+    const lines = wrapLines(g, text, maxW);
+    if (lines.length <= maxLines) return { size, lines };
+  }
+  g.font = `${weight} ${min}px ${CARD_FONT}`;
+  const lines = wrapLines(g, text, maxW);
+  return { size: min, lines: lines.slice(0, maxLines).map((l, i) => (i === maxLines - 1 && lines.length > maxLines ? l.slice(0, -1) + '…' : l)) };
+}
+function drawCard(card, i, n, theme, footer) {
+  const c = document.createElement('canvas');
+  c.width = c.height = 1080;
+  const g = c.getContext('2d');
+  const col = (k) => '#' + theme[k];
+  g.fillStyle = col('bg');
+  g.fillRect(0, 0, 1080, 1080);
+  g.fillStyle = col('accent');
+  g.fillRect(90, 110, 130, 16);
+  g.textBaseline = 'top';
+  const h = fitText(g, card.headline, 900, 4, 92, 56, 700);
+  g.fillStyle = col('text');
+  g.font = `700 ${h.size}px ${CARD_FONT}`;
+  let y = 180;
+  for (const l of h.lines) { g.fillText(l, 90, y); y += h.size * 1.3; }
+  if (card.body) {
+    y += 40;
+    const b = fitText(g, card.body, 900, 6, 50, 34, 400);
+    g.fillStyle = col('sub');
+    g.font = `400 ${b.size}px ${CARD_FONT}`;
+    for (const l of b.lines) { if (y > 900) break; g.fillText(l, 90, y); y += b.size * 1.5; }
+  }
+  g.font = `700 30px ${CARD_FONT}`;
+  g.fillStyle = col('accent');
+  g.fillText(footer, 90, 990);
+  g.font = `400 28px ${CARD_FONT}`;
+  g.fillStyle = col('sub');
+  g.textAlign = 'right';
+  g.fillText(`${i + 1} / ${n}`, 990, 992);
+  return c.toDataURL('image/png');
+}
+
+// ───────── PPT · 카드뉴스 스튜디오 ─────────
+function openStudio(id, kind) {
+  const t = S.tasks.find((x) => x.id === id);
+  if (!t) return;
+  const label = kind === 'cards' ? '🖼️ 카드뉴스' : '📊 강의 PPT';
+  const themeOpts = Object.entries(S.themes).map(([k, v]) => `<option value="${k}" ${k === S.settings.slideTheme ? 'selected' : ''}>${esc(v.name)}</option>`).join('');
+  openModal(`<h2>${label} 만들기</h2>
+    <p class="muted">"${esc(t.title)}" 결과물을 ${kind === 'cards' ? '인스타그램용 정사각형 카드' : '강의용 슬라이드'}로 바꿉니다. 비서실이 내용을 나눠 구성하고, 색상은 언제든 바꿀 수 있습니다.</p>
+    <div class="studio-bar">
+      <label>색상 <select id="studioTheme">${themeOpts}</select></label>
+      <button class="primary" id="studioMake">${t.slides?.[kind] ? '다시 구성하기' : '구성 만들기'}</button>
+    </div>
+    <div id="studioOut">${t.slides?.[kind] ? '' : '<p class="muted">[구성 만들기]를 누르면 미리보기가 나옵니다.</p>'}</div>`);
+  let data = t.slides?.[kind]?.data || null;
+  const show = () => {
+    if (!data) return;
+    const theme = $('#studioTheme').value;
+    const th = S.themes[theme];
+    const footer = `${S.owner.name} ${S.owner.title}`;
+    const file = `/api/tasks/${id}/pptx?kind=${kind}&theme=${theme}`;
+    const safe = t.title.replace(/[\\/:*?"<>|]/g, '_');
+    let html = `<div class="actions" style="margin-bottom:10px"><button class="primary" data-pptx="${esc(file)}">⬇️ PowerPoint 파일 받기 (.pptx)</button></div>`;
+    if (kind === 'cards') {
+      html += '<div class="cards-grid">' + data.cards.map((c, i) => `<figure><img alt="${esc(c.headline)}" src="${drawCard(c, i, data.cards.length, th, footer)}" /><a href="#" data-png="${esc(`${safe}_${i + 1}.png`)}">PNG 저장</a></figure>`).join('') + '</div>';
+      if (data.caption) html += `<h3>인스타그램 캡션</h3><div class="caption-box">${esc(data.caption)}</div><div class="actions" style="margin-top:6px"><button id="copyCaption">📋 캡션 복사</button></div>`;
+    } else {
+      html += `<div class="slide-list"><div class="slide-mini"><b>표지 · ${esc(data.title)}</b>${data.subtitle ? `<small>${esc(data.subtitle)}</small>` : ''}</div>` +
+        data.slides.map((sl, i) => `<div class="slide-mini"><b>${i + 2}. ${esc(sl.title)}</b><ul>${sl.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>${sl.notes ? `<small>🎤 ${esc(sl.notes)}</small>` : ''}</div>`).join('') + '</div>';
+    }
+    $('#studioOut').innerHTML = html;
+    const cc = $('#copyCaption');
+    if (cc) cc.onclick = () => navigator.clipboard.writeText(data.caption).then(() => toast('캡션을 복사했습니다'), () => toast('복사하지 못했습니다'));
+  };
+  $('#studioTheme').onchange = show;
+  $('#studioMake').onclick = async (ev) => {
+    const btn = ev.target;
+    btn.disabled = true;
+    $('#studioOut').innerHTML = '<p><span class="spin">⏳</span> 구성하는 중입니다… (30초 정도 걸릴 수 있어요)</p>';
+    try {
+      data = (await api('POST', `/api/tasks/${id}/slides`, { kind })).data;
+      btn.textContent = '다시 구성하기';
+      show();
+      refresh();
+    } catch (e) {
+      $('#studioOut').innerHTML = `<p class="err">${esc(e.message)}</p>`;
+    } finally {
+      btn.disabled = false;
+    }
+  };
+  show();
+}
+
+// ───────── 주간 업무 보고서 ─────────
+let week = 0;
+let report = null;
+async function loadReport() {
+  try {
+    report = await api('GET', `/api/report?week=${week}`);
+    renderReport();
+  } catch (e) {
+    toast(e.message);
+  }
+}
+function renderReport() {
+  const r = report;
+  const T = r.totals;
+  $('#repRange').textContent = `${r.from} (월) ~ ${r.to} (일)${week === 0 ? ' · 이번 주' : week === -1 ? ' · 지난주' : ''}`;
+  $('#repNext').disabled = week === 0;
+  $('#repStats').innerHTML = [
+    ['💬', '지시', T.orders],
+    ['✅', '완료', T.done],
+    ['⏱️', '절약 추정', `${T.savedHours}시간`],
+    ...(week === 0 ? [['📥', '결재 대기', T.review]] : []),
+    ['✏️', '수정 요청', T.revisions],
+    ['🗑️', '반려', T.rejected],
+  ].map(([i, l, v]) => `<div class="stat"><b>${v}</b><span>${i} ${l}</span></div>`).join('');
+  const max = Math.max(1, ...r.daily.map((d) => d.done));
+  const wd = ['월', '화', '수', '목', '금', '토', '일'];
+  $('#repDaily').innerHTML = r.daily.map((d, i) => `<div class="bar" title="${d.date} 완료 ${d.done}건"><b>${d.done || ''}</b><i style="height:${(d.done / max) * 120}px"></i>${wd[i]}</div>`).join('');
+  $('#repTable').innerHTML = `<tr><th>직원</th><th>완료</th>${week === 0 ? '<th>결재 대기</th>' : ''}<th>수정 요청</th><th>반려</th><th>절약(시간)</th></tr>` +
+    (r.byEmployee.map((e) => `<tr><td>${e.emoji} ${esc(e.name)} <span class="muted">${esc(e.role)}</span></td><td>${e.done}</td>${week === 0 ? `<td>${e.review}</td>` : ''}<td>${e.revisions}</td><td>${e.rejected}</td><td>${Math.round((e.done * r.minutesPerTask / 60) * 10) / 10}</td></tr>`).join('') ||
+    `<tr><td colspan="6" class="muted">이 주에는 기록이 없습니다.</td></tr>`);
+  $('#repDone').innerHTML = r.doneTitles.map((x) => `<li>${esc(x)}</li>`).join('') || '<li class="muted">완료한 업무가 없습니다.</li>';
+  const rv = $('#repReview');
+  rv.classList.toggle('muted', !r.review);
+  rv.innerHTML = r.review ? md(r.review.text) + `<small class="muted">${when(r.review.at)}</small>` : '아직 총평이 없습니다. [AI 총평 받기]를 누르면 비서실장이 한 주를 정리해 드립니다. (월요일 아침에는 지난주 총평이 자동으로 만들어집니다)';
+  $('#repReviewBtn').textContent = r.review ? '총평 다시 받기' : 'AI 총평 받기';
+}
+$('#repPrev').onclick = () => { week -= 1; loadReport(); };
+$('#repNext').onclick = () => { if (week < 0) { week += 1; loadReport(); } };
+$('#repReviewBtn').onclick = (ev) => act(ev.target, async () => { report = await api('POST', '/api/report/review', { week }); renderReport(); }, '총평을 받았습니다');
+$('#repDl').onclick = () => {
+  if (!report) return;
+  const r = report;
+  const T = r.totals;
+  const lines = [
+    `# 주간 업무 보고서 (${r.from} ~ ${r.to})`, '',
+    `- 지시 ${T.orders}건 · 완료 ${T.done}건 · 수정 요청 ${T.revisions}회 · 반려 ${T.rejected}건`,
+    `- 절약 추정: 약 ${T.savedHours}시간 (업무 1건당 ${r.minutesPerTask}분 기준)`, '',
+    '## 비서실장 총평', r.review ? r.review.text : '(없음)', '',
+    '## 직원별 실적', '| 직원 | 완료 | 수정 요청 | 반려 |', '|---|---|---|---|',
+    ...r.byEmployee.map((e) => `| ${e.name} (${e.role}) | ${e.done} | ${e.revisions} | ${e.rejected} |`), '',
+    '## 완료한 업무', ...(r.doneTitles.length ? r.doneTitles.map((x) => `- ${x}`) : ['(없음)']),
+  ];
+  download(`주간보고서_${r.from}.md`, lines.join('\n'));
+};
+
+// ───────── 카카오톡 · 알림 설정 ─────────
+function renderKakao() {
+  const k = S.kakao;
+  const box = $('#kakaoBox');
+  if (!k.configured) {
+    box.innerHTML = `<p>결재함 도착, 아침 브리핑, 주간 보고를 <b>대표님 카카오톡(나와의 채팅)</b>으로 받을 수 있습니다. 처음 한 번 준비가 필요합니다. (약 10분, README의 "카카오톡 알림 준비" 참고)</p>
+      <ol class="guide">
+        <li><a href="https://developers.kakao.com/" target="_blank" rel="noopener">카카오 개발자 사이트</a>에 로그인 → <b>내 애플리케이션 → 애플리케이션 추가</b></li>
+        <li><b>플랫폼 → Web</b>에 사이트 도메인 <code>${esc(new URL(k.redirectUri).origin)}</code> 등록</li>
+        <li><b>카카오 로그인</b> 활성화, Redirect URI에 <code>${esc(k.redirectUri)}</code> 등록</li>
+        <li><b>동의항목</b>에서 "카카오톡 메시지 전송"을 <b>선택 동의</b>로 설정</li>
+        <li><b>앱 키</b>의 REST API 키를 <code>.env</code>의 <code>KAKAO_REST_API_KEY</code>에 넣고 앱 다시 켜기</li>
+      </ol>`;
+  } else if (!k.connected) {
+    box.innerHTML = `<p>카카오톡을 연결하면 대표님 <b>나와의 채팅</b>으로 알림이 옵니다. 고객이나 다른 사람에게는 보내지 않습니다.</p>
+      <a class="btn-link" href="/auth/kakao/start">카카오톡 연결하기</a>`;
+  } else {
+    box.innerHTML = `<p class="ok-text">✅ 연결됨${k.nickname ? `: <b>${esc(k.nickname)}</b>` : ''}</p>
+      ${k.lastError ? `<p class="err">최근 전송 실패: ${esc(k.lastError)}</p>` : ''}
+      <div class="actions"><button id="kTest">테스트 메시지 보내기</button><button class="bad" id="kOff">연결 해제</button></div>`;
+    $('#kTest').onclick = (ev) => act(ev.target, () => api('POST', '/api/kakao/test'), '카카오톡을 확인해 보세요');
+    $('#kOff').onclick = (ev) => { if (confirm('카카오톡 연결을 해제할까요?')) act(ev.target, () => api('POST', '/api/kakao/disconnect'), '연결을 해제했습니다'); };
+  }
+  const s = S.settings;
+  for (const key of ['notifyReview', 'notifyBriefing', 'notifyWeekly']) $('#' + key).checked = s[key];
+  $('#minutesPerTask').value = s.minutesPerTask;
+  $('#slideTheme').innerHTML = Object.entries(S.themes).map(([key, v]) => `<option value="${key}" ${key === s.slideTheme ? 'selected' : ''}>${esc(v.name)}</option>`).join('');
+}
+$('#notifySettings').onsubmit = (ev) => {
+  ev.preventDefault();
+  act(ev.submitter, () => api('PUT', '/api/settings', {
+    notifyReview: $('#notifyReview').checked,
+    notifyBriefing: $('#notifyBriefing').checked,
+    notifyWeekly: $('#notifyWeekly').checked,
+    minutesPerTask: Number($('#minutesPerTask').value),
+    slideTheme: $('#slideTheme').value,
+  }), '저장했습니다');
+};
+
 // ───────── 이벤트 ─────────
 $('#tabs').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-view]');
   if (!b) return;
+  if (b.dataset.view === 'report') loadReport();
   document.querySelectorAll('#tabs button').forEach((x) => x.classList.toggle('on', x === b));
   document.querySelectorAll('.view').forEach((v) => v.classList.toggle('hidden', v.id !== `view-${b.dataset.view}`));
 });
@@ -431,8 +660,9 @@ $('#kbForm').onsubmit = (ev) => {
 document.addEventListener('click', (ev) => {
   const go = ev.target.closest('[data-goto]');
   if (go) { ev.preventDefault(); modal.close(); document.querySelector(`#tabs [data-view="${go.dataset.goto}"]`).click(); return; }
-  const el = ev.target.closest('[data-gmail],[data-drive],[data-task],[data-approve],[data-revise],[data-reject],[data-retry],[data-copy],[data-dl],[data-direct],[data-edit],[data-delemp],[data-delkb],[data-deltask],[data-ex]');
+  const el = ev.target.closest('[data-studio],[data-png],[data-pptx],[data-gmail],[data-drive],[data-task],[data-approve],[data-revise],[data-reject],[data-retry],[data-copy],[data-dl],[data-direct],[data-edit],[data-delemp],[data-delkb],[data-deltask],[data-ex]');
   if (!el) return;
+  if (el.tagName === 'A') ev.preventDefault();
   const d = el.dataset;
   const task = (id) => S.tasks.find((t) => t.id === id);
   if (d.ex) $('#orderText').value = EXAMPLES[d.ex];
@@ -446,6 +676,9 @@ document.addEventListener('click', (ev) => {
   else if (d.retry) act(el, async () => { await api('POST', `/api/tasks/${d.retry}/retry`); modal.close(); }, '다시 시도합니다');
   else if (d.copy) navigator.clipboard.writeText(task(d.copy).result).then(() => toast('복사했습니다'), () => alert('복사하지 못했습니다.'));
   else if (d.dl) { const t = task(d.dl); download(`${t.title.replace(/[\\/:*?"<>|]/g, '_')}.md`, t.result); }
+  else if (d.studio) openStudio(d.studio, d.kind);
+  else if (d.png) savePng(el.closest('figure').querySelector('img').src, d.png);
+  else if (d.pptx) act(el, () => downloadUrl(d.pptx));
   else if (d.gmail) gmailDraft(d.gmail);
   else if (d.drive) act(el, async () => {
     const t = task(d.drive);
@@ -459,8 +692,19 @@ document.addEventListener('click', (ev) => {
   else if (d.deltask) { if (confirm('이 업무를 삭제할까요?')) act(el, async () => { await api('DELETE', `/api/tasks/${d.deltask}`); modal.close(); }); }
 });
 
-// Google 연결 결과 안내 (?google=...)
+// Google · 카카오 연결 결과 안내 (?google=... / ?kakao=...)
 const gq = new URLSearchParams(location.search);
+if (gq.has('kakao')) {
+  const msg = {
+    connected: '✅ 카카오톡을 연결했습니다. [테스트 메시지 보내기]로 확인해 보세요',
+    denied: '카카오톡 연결을 취소했습니다',
+    expired: '연결 시간이 지났습니다. 다시 시도해 주세요',
+    'not-configured': '.env 에 KAKAO_REST_API_KEY 를 먼저 넣어 주세요',
+    error: `카카오톡 연결 실패: ${gq.get('msg') || ''}`,
+  }[gq.get('kakao')];
+  if (msg) setTimeout(() => toast(msg), 300);
+  history.replaceState(null, '', '/');
+}
 if (gq.has('google')) {
   const msg = {
     connected: '✅ Google 계정을 연결했습니다',
@@ -472,6 +716,7 @@ if (gq.has('google')) {
   if (msg) setTimeout(() => toast(msg), 300);
   history.replaceState(null, '', '/');
 }
+if (gq.has('google') || gq.has('kakao')) document.querySelector('#tabs [data-view="settings"]').click();
 
 (async () => {
   const st = await api('GET', '/api/auth/status');

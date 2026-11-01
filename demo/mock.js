@@ -2,6 +2,7 @@
 // (실제 AI·Google·파일 저장 없이 화면 흐름만 보여 줍니다. 새로고침하면 처음 상태로 돌아갑니다.)
 (() => {
   const SEED = __SEED__; // 빌드 때 src/seed.js 내용이 들어갑니다
+  const THEMES = __THEMES__; // 빌드 때 src/slides.js 색상이 들어갑니다
   const uid = (p) => `${p}-${Math.random().toString(36).slice(2, 10)}`;
   const now = () => new Date().toISOString();
   const ago = (min) => new Date(Date.now() - min * 60000).toISOString();
@@ -215,20 +216,32 @@
     orders: [],
     tasks: [],
     briefing: null,
-    settings: { autoBriefing: true, briefingTime: '08:00' },
+    settings: { autoBriefing: true, briefingTime: '08:00', notifyReview: true, notifyBriefing: true, notifyWeekly: true, minutesPerTask: 40, slideTheme: 'lavender' },
+    kakao: { configured: true, connected: true, nickname: '전경숙', redirectUri: 'http://localhost:3000/auth/kakao/callback', lastError: null },
+    weeklyReviews: {},
     google: { configured: true, connected: true, email: 'sugishimter@gmail.com', redirectUri: '' },
     loggedIn: true,
     password: null,
   };
   const addOrder = (text, summary, minAgo, assigns) => {
+    // assigns: [직원, 제목, 상태]
     const o = { id: uid('o'), text, summary, status: 'assigned', createdAt: ago(minAgo) };
     db.orders.unshift(o);
     for (const [employeeId, title, status] of assigns) {
       const t = { id: uid('t'), orderId: o.id, orderText: text, employeeId, title, instructions: `${title}: 대표 지시에 맞춰 초안 작성`, status, result: '', history: [], error: null, createdAt: ago(minAgo), updatedAt: ago(minAgo - 3) };
       t.result = resultFor(t);
+      if (status === 'done') t.approvedAt = ago(minAgo - 5);
       db.tasks.unshift(t);
     }
   };
+  // 지난 며칠간 처리한 업무 (주간 보고서 예시용)
+  [
+    [6, 'sns', '블로그 글: 연금 3층 구조'], [6, 'exam-writer', 'AI 자격증 예상문제 20개'], [5, 'proposal', '아산시 평생학습관 강의 제안서'],
+    [5, 'crm', '11월 생일 고객 축하 문자'], [4, 'lecture-planner', '컬러테라피 특강 교안'], [3, 'web', 'gptstore2 수강 신청 공지'],
+    [3, 'writer', '칼럼: 돈 이야기는 마음 이야기'], [2, 'fin-analyst', '박OO 고객 보장 분석 요약'], [1, 'face-counsel', '상담 리포트 양식'],
+    [1, 'sns', '유튜브 쇼츠 대본 3편'],
+  ].forEach(([days, emp, title]) => addOrder(title + ' 해 줘', `${title} 업무를 배정했습니다.`, days * 1440 + 120, [[emp, title, 'done']]));
+  db.tasks.find((t) => t.employeeId === 'proposal').history.push({ feedback: '비용 항목을 표로 정리해 줘', result: '', at: ago(5 * 1440) });
   addOrder('충남AIXR 이사회 회의 안내 공문 써 줘', '협회 사무국장 보람에게 공문 작성을 배정했습니다.', 180, [['association', '이사회 안내 공문', 'done']]);
   addOrder(
     '이번 달 은퇴설계 세미나 열자. 커리큘럼, 홍보글, 기존 고객 초대 문자 준비해 줘',
@@ -314,9 +327,40 @@
     }],
     ['GET', /^\/api\/state$/, () => ({
       demo: true, owner: db.owner, secretary: SEED.SECRETARY, employees: db.employees, knowledge: db.knowledge,
-      orders: db.orders, tasks: db.tasks, briefing: db.briefing, settings: db.settings, google: db.google,
+      orders: db.orders.slice(0, 50), tasks: db.tasks, briefing: db.briefing, settings: db.settings, google: db.google, kakao: db.kakao, themes: THEMES,
     })],
-    ['PUT', /^\/api\/settings$/, (b) => Object.assign(db.settings, { autoBriefing: !!b.autoBriefing, briefingTime: b.briefingTime || db.settings.briefingTime })],
+    ['POST', /^\/api\/tasks\/([^/]+)\/slides$/, (b, [id]) => {
+      const t = findTask(id);
+      const kind = b.kind === 'cards' ? 'cards' : 'ppt';
+      const data = sampleSlides(t, kind);
+      t.slides = { ...(t.slides || {}), [kind]: { data, at: now() } };
+      return { kind, data };
+    }],
+    ['GET', /^\/api\/report/, (_b, _p, url) => buildReport(Number(new URL(url, 'http://x').searchParams.get('week')) || 0)],
+    ['POST', /^\/api\/report\/review$/, (b) => {
+      const r = buildReport(Number(b.week) || 0);
+      const top = [...r.byEmployee].sort((x, y) => y.done - x.done)[0];
+      db.weeklyReviews[r.key] = {
+        text: [
+          `이번 주 AI 직원들이 **${r.totals.done}건**을 완료해 대표님 시간을 약 **${r.totals.savedHours}시간** 아꼈습니다.`,
+          '',
+          '**잘된 점**',
+          top ? `- ${top.emoji} ${top.name}(${top.role})가 ${top.done}건으로 가장 많이 처리했습니다.` : '- 꾸준히 업무가 처리되었습니다.',
+          '- 강의·홍보·고객관리가 고르게 진행되어 세미나 준비가 순조롭습니다.',
+          '',
+          '**다음 주 제안**',
+          '- 제안서 작성자 도윤에게 수정 요청이 있었어요. 업무 지침서에 "비용은 표로 정리"를 추가해 보세요.',
+          `- 결재 대기 ${r.totals.review}건을 월요일 오전에 먼저 처리하시면 홍보 일정이 앞당겨집니다.`,
+          '',
+          '*(체험판 예시 총평입니다)*',
+        ].join('\n'),
+        at: now(),
+      };
+      return buildReport(Number(b.week) || 0);
+    }],
+    ['POST', /^\/api\/kakao\/test$/, () => ({ ok: true })],
+    ['POST', /^\/api\/kakao\/disconnect$/, () => Object.assign(db.kakao, { connected: false, nickname: null })],
+    ['PUT', /^\/api\/settings$/, (b) => Object.assign(db.settings, b)],
     ['POST', /^\/api\/orders$/, (b) => {
       const text = need(b.text, '지시 내용');
       const o = { id: uid('o'), text, summary: '비서실장이 업무를 나누는 중…', status: 'planning', createdAt: now() };
@@ -368,23 +412,89 @@
   const json = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
   window.fetch = async (url, opts = {}) => {
     const method = opts.method || 'GET';
-    const r = routes.find(([m, re]) => m === method && re.test(url));
+    const r = routes.find(([m, re]) => m === method && re.test(url.split('?')[0]));
     await new Promise((res) => setTimeout(res, 120));
     if (!r) return json(404, { error: '없는 주소입니다.' });
     try {
       const body = opts.body ? JSON.parse(opts.body) : {};
-      return json(200, structuredClone(await r[2](body, url.match(r[1]).slice(1))));
+      return json(200, structuredClone(await r[2](body, url.match(r[1]).slice(1), url)));
     } catch (err) {
       return json(err.status || 500, { error: err.message });
     }
   };
 
+  // ───────── PPT · 카드뉴스 예시 ─────────
+  function sampleSlides(t, kind) {
+    const sections = [];
+    let cur = null;
+    for (const raw of t.result.split('\n')) {
+      const line = raw.trim().replace(/\*\*/g, '');
+      if (!line || line.startsWith('>') || /^[-|]{3,}/.test(line) || /^\|[\s:|-]+\|$/.test(line)) continue;
+      const h = line.match(/^#{1,4}\s+(.*)/);
+      if (h) { cur = { title: h[1], bullets: [] }; sections.push(cur); continue; }
+      if (!cur) continue;
+      const text = line.replace(/^([-*•]|\d+[.)])\s+/, '').replace(/^\|(.*)\|$/, (_, c) => c.split('|').map((x) => x.trim()).filter(Boolean).join(' · '));
+      if (text && cur.bullets.length < 5) cur.bullets.push(text.slice(0, 70));
+    }
+    const filled = sections.filter((x) => x.bullets.length);
+    if (kind === 'cards') {
+      if (t.employeeId === 'sns') {
+        return {
+          cards: [
+            { headline: '요즘 마음이 무슨 색인가요?', body: '색은 말보다 먼저 마음을 보여 줍니다' },
+            { headline: '나에게 맞는 색으로 쉬어 가는 2시간', body: '컬러테라피 힐링 특강에 초대합니다' },
+            { headline: '이런 분께 추천해요', body: '지친 직장인 · 쉼이 필요한 엄마 · 나를 알고 싶은 분' },
+            { headline: '전경숙 강사와 함께', body: '금융테라피 · 컬러테라피 · AI 활용 강의' },
+            { headline: '신청은 프로필 링크에서 🌈', body: '선착순 20명 · 천안' },
+          ],
+          caption: '오늘 하루, 내 마음의 색을 들여다본 적 있으신가요? 🎨\n함께 쉬어 가는 시간에 초대합니다.\n\n#컬러테라피 #힐링특강 #천안강의 #마음챙김 #나다운삶',
+        };
+      }
+      return { cards: (filled.length ? filled : [{ title: t.title, bullets: [] }]).slice(0, 6).map((x) => ({ headline: x.title.slice(0, 22), body: x.bullets.slice(0, 2).join(' ').slice(0, 70) })), caption: '' };
+    }
+    return { title: t.title, subtitle: `${db.owner.name} ${db.owner.title}`, slides: filled.map((x) => ({ title: x.title, bullets: x.bullets, notes: '' })) };
+  }
+
+  // ───────── 주간 보고서 계산 ─────────
+  function buildReport(offset) {
+    offset = Math.max(-52, Math.min(0, offset));
+    const DAY = 864e5;
+    const today = kstDate(0);
+    const dow = new Date(`${today}T00:00:00Z`).getUTCDay();
+    const from = Date.parse(`${today}T00:00:00+09:00`) - ((dow + 6) % 7) * DAY + offset * 7 * DAY;
+    const to = from + 7 * DAY;
+    const kd = (ms) => new Date(ms + 9 * 3600e3).toISOString().slice(0, 10);
+    const inRange = (iso) => iso && Date.parse(iso) >= from && Date.parse(iso) < to;
+    const per = new Map(db.employees.map((e) => [e.id, { id: e.id, name: e.name, role: e.role, emoji: e.emoji, done: 0, review: 0, rejected: 0, revisions: 0 }]));
+    const totals = { orders: db.orders.filter((o) => inRange(o.createdAt)).length, done: 0, review: 0, rejected: 0, revisions: 0 };
+    const daily = Array.from({ length: 7 }, (_, i) => ({ date: kd(from + i * DAY), done: 0 }));
+    const doneTitles = [];
+    for (const t of db.tasks) {
+      const e = per.get(t.employeeId);
+      const at = t.approvedAt || t.updatedAt;
+      if (t.status === 'done' && inRange(at)) { totals.done++; if (e) e.done++; doneTitles.push(t.title); const d = daily.find((x) => x.date === kd(Date.parse(at))); if (d) d.done++; }
+      if (offset === 0 && t.status === 'review') { totals.review++; if (e) e.review++; }
+      if (t.status === 'rejected' && inRange(t.updatedAt)) { totals.rejected++; if (e) e.rejected++; }
+      const rv = t.history.filter((h) => inRange(h.at)).length;
+      totals.revisions += rv;
+      if (e) e.revisions += rv;
+    }
+    totals.savedHours = Math.round(((totals.done * db.settings.minutesPerTask) / 60) * 10) / 10;
+    const key = kd(from);
+    return { key, offset, from: key, to: kd(to - DAY), totals, daily, byEmployee: [...per.values()].filter((e) => e.done || e.review || e.rejected || e.revisions), doneTitles, minutesPerTask: db.settings.minutesPerTask, review: db.weeklyReviews[key] || null };
+  }
+
   // Google 연결 버튼: 실제 Google 대신 연결된 것처럼 보여 줌
   document.addEventListener('click', (ev) => {
-    const a = ev.target.closest('a[href="/auth/google/start"]');
+    const a = ev.target.closest('a[href="/auth/google/start"], a[href="/auth/kakao/start"]');
     if (!a) return;
     ev.preventDefault();
-    Object.assign(db.google, { connected: true, email: 'sugishimter@gmail.com' });
-    window.__demoToast?.('✅ (체험판) Google 계정을 연결했습니다');
+    if (a.getAttribute('href').includes('kakao')) {
+      Object.assign(db.kakao, { connected: true, nickname: '전경숙' });
+      window.__demoToast?.('✅ (체험판) 카카오톡을 연결했습니다');
+    } else {
+      Object.assign(db.google, { connected: true, email: 'sugishimter@gmail.com' });
+      window.__demoToast?.('✅ (체험판) Google 계정을 연결했습니다');
+    }
   }, true);
 })();

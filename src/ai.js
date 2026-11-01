@@ -207,3 +207,50 @@ async function demoResult(task, employee) {
   const rev = task.history.length ? `\n\n> ✏️ 수정 반영 (${task.history.length}차): ${task.history.at(-1).feedback}` : '';
   return `# ${task.title}\n\n**담당:** ${employee.emoji} ${employee.name} (${employee.role})${rev}\n\n## 작업 지시\n${task.instructions}\n\n## 결과물 (데모)\n- 지금은 **데모 모드**라서 예시 결과물이 표시됩니다.\n- \`.env\` 파일에 \`ANTHROPIC_API_KEY\`를 넣고 다시 실행하면 이 직원이 실제로 업무를 처리합니다.\n\n---\n*최종 확인과 발송은 대표님 결재 후 진행됩니다.*`;
 }
+
+// ───────────────────────── 4) 결과물 → PPT / 카드뉴스 구성 ─────────────────────────
+import { SCHEMAS, fromMarkdown, normalize } from './slides.js';
+
+export async function toSlides(task, kind, ctx) {
+  if (DEMO) return fromMarkdown(task.result, kind, task.title);
+  const ask =
+    kind === 'cards'
+      ? '아래 결과물을 인스타그램 카드뉴스 5~8장으로 구성해 주세요. 첫 장은 눈길을 끄는 질문이나 한 문장, 마지막 장은 행동 안내(신청·문의 등). 각 장은 큰 글씨 한 줄과 짧은 설명. 캡션과 해시태그도 함께.'
+      : '아래 결과물을 강의용 슬라이드로 구성해 주세요. 표지 제목·부제, 본문 슬라이드 6~14장. 각 슬라이드는 짧은 핵심 문장 2~5개와, 강사가 말할 내용을 발표자 노트로.';
+  const text = await callClaude({
+    system: `당신은 ${ctx.owner.name} 대표 회사의 프레젠테이션 디자이너입니다. 결과물의 사실과 숫자를 바꾸지 말고, 없는 내용은 지어내지 않습니다. "[확인 필요]" 표시는 그대로 둡니다.\n\n${COMPANY_RULES}`,
+    messages: [{ role: 'user', content: `${ask}\n\n[결과물 제목] ${task.title}\n\n[결과물]\n${task.result}` }],
+    effort: 'low',
+    format: { type: 'json_schema', schema: SCHEMAS[kind] },
+  });
+  return normalize(kind, JSON.parse(text), task.title);
+}
+
+// ───────────────────────── 5) 주간 업무 보고서 총평 ─────────────────────────
+export async function weeklyReview(report, ctx) {
+  const lines = report.byEmployee.map((e) => `- ${e.name}(${e.role}): 완료 ${e.done}, 결재대기 ${e.review}, 반려 ${e.rejected}, 수정요청 ${e.revisions}`).join('\n');
+  if (DEMO) {
+    const top = [...report.byEmployee].sort((a, b) => b.done - a.done)[0];
+    return [
+      `이번 주 AI 직원들이 **${report.totals.done}건**을 완료해 대표님 시간을 약 **${report.totals.savedHours}시간** 아꼈습니다.`,
+      top && top.done ? `가장 많이 일한 직원은 ${top.emoji} **${top.name}**(${top.done}건)입니다.` : '',
+      report.totals.review ? `결재를 기다리는 업무가 ${report.totals.review}건 있으니 먼저 확인해 주세요.` : '',
+      '',
+      '*(데모 모드 총평입니다. API 키를 넣으면 비서실장이 직접 분석합니다.)*',
+    ]
+      .filter((l) => l !== '')
+      .join('\n');
+  }
+  return callClaude({
+    system: `당신은 ${ctx.owner.name} 대표의 AI 비서실장 "${SECRETARY.name}"입니다. 숫자는 주어진 것만 쓰고 지어내지 않습니다.\n\n${ownerBlock(ctx.owner)}`,
+    messages: [
+      {
+        role: 'user',
+        content:
+          `주간 업무 보고서의 "비서실장 총평"을 써 주세요. 구성: 한 주 요약 2문장 → 잘된 점 2가지 → 다음 주 제안 2가지(반려·수정이 많은 직원은 업무 지침서 보완 제안). 8줄 이내, 마크다운.\n\n` +
+          `[기간] ${report.from} ~ ${report.to}\n[합계] 지시 ${report.totals.orders}건, 완료 ${report.totals.done}건, 결재대기 ${report.totals.review}건, 반려 ${report.totals.rejected}건, 수정요청 ${report.totals.revisions}회, 절약 추정 ${report.totals.savedHours}시간\n[직원별]\n${lines}\n[완료한 업무]\n${report.doneTitles.slice(0, 30).map((t) => `- ${t}`).join('\n') || '(없음)'}`,
+      },
+    ],
+    effort: 'low',
+  });
+}

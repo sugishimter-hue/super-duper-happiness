@@ -143,3 +143,32 @@ dialog::backdrop { background: rgba(0,0,0,.45); }
 ol.guide { padding-left: 20px; font-size: .9rem; }
 ol.guide li { margin-bottom: 4px; }
 .btn-link { display: inline-block; background: var(--accent); color: #fff; font-weight: 600; padding: 8px 14px; border-radius: 10px; text-decoration: none; }
+
+/* 주간 보고 */
+.report-head { margin-bottom: 12px; align-items: flex-start; }
+.rep-stats { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); margin-bottom: 16px; }
+.rep-stats .stat { background: var(--card); border: 1px solid var(--line); }
+.bars { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 170px; padding-top: 10px; }
+.bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 4px; font-size: .8rem; color: var(--muted); }
+.bar i { display: block; width: 70%; max-width: 38px; background: var(--accent); border-radius: 6px 6px 2px 2px; min-height: 3px; }
+.bar b { color: var(--text); font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; }
+.rep-table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.rep-table th, .rep-table td { padding: 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.rep-table th:first-child, .rep-table td:first-child { text-align: left; }
+.rep-table th { color: var(--muted); font-weight: 600; font-size: .8rem; }
+.num { width: 90px; }
+select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+
+/* PPT · 카드뉴스 스튜디오 */
+.studio-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 8px 0 12px; }
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.cards-grid figure { margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.cards-grid img { width: 100%; border-radius: 8px; border: 1px solid var(--line); }
+.cards-grid a { font-size: .8rem; color: var(--accent); }
+.slide-list { display: flex; flex-direction: column; gap: 8px; }
+.slide-mini { border: 1px solid var(--line); border-left: 6px solid var(--accent); border-radius: 8px; padding: 10px 14px; background: var(--bg); }
+.slide-mini b { display: block; margin-bottom: 4px; }
+.slide-mini ul { margin: 0; padding-left: 18px; font-size: .88rem; }
+.slide-mini small { display: block; color: var(--muted); margin-top: 4px; font-size: .78rem; }
+.caption-box { white-space: pre-wrap; background: var(--bg); padding: 10px 12px; border-radius: 8px; font-size: .88rem; }
