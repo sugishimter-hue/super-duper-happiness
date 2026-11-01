@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "demo": "DEMO_MODE=1 node server.js"
+    "demo": "node server.js --demo"
   },
   "engines": { "node": ">=20.12" },
   "dependencies": {

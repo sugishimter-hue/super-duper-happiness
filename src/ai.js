@@ -3,7 +3,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { SECRETARY } from './seed.js';
 
 const MODEL = process.env.CLAUDE_MODEL || 'claude-opus-5-5';
-export const DEMO = process.env.DEMO_MODE === '1' || !process.env.ANTHROPIC_API_KEY;
+export const DEMO = process.argv.includes('--demo') || process.env.DEMO_MODE === '1' || !process.env.ANTHROPIC_API_KEY;
 
 const client = DEMO ? null : new Anthropic();
 
