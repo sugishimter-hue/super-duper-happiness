@@ -12,7 +12,7 @@ const must = (s, a, b) => {
 };
 
 // [도입 문의하기] → 상담 신청서 → 이 주소로 연결 (카카오톡 채널 주소를 받으면 KAKAO_CHANNEL_URL 로 지정)
-const CONSULT_URL = process.env.KAKAO_CHANNEL_URL || 'https://www.aijemu.ai.kr';
+const CONSULT_URL = process.env.KAKAO_CHANNEL_URL || 'https://pf.kakao.com/_xmxdxjQn/chat'; // 전경숙 대표 카카오톡 채널 1:1 채팅
 const seed = await import(path.join(root, 'src/seed.js'));
 const { THEMES } = await import(path.join(root, 'src/slides.js'));
 const SEED = JSON.stringify({ OWNER: seed.OWNER, SECRETARY: seed.SECRETARY, EMPLOYEES: seed.EMPLOYEES, KNOWLEDGE: seed.KNOWLEDGE });
