@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>나의 AI 사무실</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">🏢 <b>나의 AI 사무실</b> <span id="owner" class="muted"></span></div>
+    <span id="mode" class="badge"></span>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-view="home" class="on">🏠 대시보드</button>
+    <button data-view="review">✅ 결재함 <span id="reviewCount" class="pill"></span></button>
+    <button data-view="staff">👥 직원 관리</button>
+    <button data-view="kb">📚 지식창고</button>
+  </nav>
+
+  <main>
+    <!-- 대시보드 -->
+    <section id="view-home" class="view">
+      <div class="card order">
+        <h2>💬 업무 지시</h2>
+        <p class="muted">말하듯이 적어 주세요. 비서실장 <b>유니</b>가 알맞은 직원에게 나눠 줍니다.</p>
+        <form id="orderForm">
+          <textarea id="orderText" rows="3" placeholder="예) 다음 달 천안시청 공무원 대상 'AI로 일 잘하는 법' 2시간 특강 준비해 줘. 홍보글이랑 수강 안내문도."></textarea>
+          <div class="row">
+            <div class="chips" id="examples"></div>
+            <button class="primary" type="submit">지시하기 ▶</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="row"><h2>☀️ 비서실장 브리핑</h2><button id="briefBtn" class="ghost">새로 받기</button></div>
+          <div id="briefing" class="md muted">아직 브리핑이 없습니다. [새로 받기]를 눌러 보세요.</div>
+        </div>
+        <div class="card">
+          <h2>📊 업무 현황</h2>
+          <div class="stats" id="stats"></div>
+          <h3>최근 지시</h3>
+          <ul id="orders" class="orders"></ul>
+        </div>
+      </div>
+
+      <div class="board" id="board"></div>
+    </section>
+
+    <!-- 결재함 -->
+    <section id="view-review" class="view hidden">
+      <div id="reviewList"></div>
+    </section>
+
+    <!-- 직원 관리 -->
+    <section id="view-staff" class="view hidden">
+      <div class="row"><h2>👥 우리 회사 AI 직원</h2><button id="addEmp" class="primary">+ 직원 채용</button></div>
+      <div id="org" class="org"></div>
+    </section>
+
+    <!-- 지식창고 -->
+    <section id="view-kb" class="view hidden">
+      <div class="card">
+        <h2>📚 회사 지식창고</h2>
+        <p class="muted">강의 자료 요약, 상품·서비스 소개, 자주 쓰는 문구, 가격표 등을 넣어 두면 <b>모든 직원이 업무할 때 참고</b>합니다. 고객 개인정보는 넣지 마세요.</p>
+        <form id="kbForm" class="stack">
+          <input id="kbTitle" placeholder="제목 (예: 금융테라피 강의 소개)" />
+          <textarea id="kbContent" rows="5" placeholder="내용"></textarea>
+          <button class="primary" type="submit">저장</button>
+        </form>
+      </div>
+      <div id="kbList"></div>
+    </section>
+  </main>
+
+  <!-- 상세 보기 / 편집 모달 -->
+  <dialog id="modal"><div id="modalBody"></div></dialog>
+
+  <script src="/app.js" type="module"></script>
+</body>
+</html>
