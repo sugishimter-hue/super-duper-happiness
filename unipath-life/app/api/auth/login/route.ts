@@ -1,12 +1,12 @@
 import { env } from "cloudflare:workers";
 import { checkPassword, createSessionValue, adminPasswordConfigured, SESSION_COOKIE, sessionMaxAge } from "@/lib/auth";
-import { sameOrigin } from "@/lib/server";
+import { sameOrigin, ensureSchema } from "@/lib/server";
 
 // 비밀번호를 5번 틀리면 15분 동안 잠급니다 (D1에 IP별로 기록).
 const MAX_FAILS = 5, LOCK_MS = 15 * 60_000;
 
 async function attempts(db: D1Database) {
-  await db.prepare("CREATE TABLE IF NOT EXISTS login_attempts (ip TEXT PRIMARY KEY, fails INTEGER NOT NULL, locked_until INTEGER NOT NULL)").run();
+  await ensureSchema();
   return db;
 }
 

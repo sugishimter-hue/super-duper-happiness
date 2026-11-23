@@ -9,7 +9,7 @@
     "dev": "vinext dev --port 5173",
     "build": "vinext build",
     "preview": "wrangler dev",
-    "deploy": "npm run db:migrate:remote && vinext build && wrangler deploy",
+    "deploy": "vinext build && wrangler deploy",
     "db:migrate:local": "wrangler d1 migrations apply DB --local --config wrangler.jsonc",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote --config wrangler.jsonc",
     "cf-typegen": "wrangler types",

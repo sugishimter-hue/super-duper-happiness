@@ -1,4 +1,4 @@
-import { database, adminAllowed, sameOrigin } from '@/lib/server';
+import { database, adminAllowed, sameOrigin, ensureSchema } from '@/lib/server';
 import { z } from 'zod';
 
 const number = z.number().int().min(0).max(1000000000).nullable();
@@ -9,9 +9,8 @@ const schema = z.object({
 });
 const empty = {price:null, commission:null, scope:'', refund:'', plans:[]};
 async function table() {
-  const db = database();
-  await db.prepare('CREATE TABLE IF NOT EXISTS operating_policy (id INTEGER PRIMARY KEY, policy TEXT NOT NULL, revision INTEGER NOT NULL)').run();
-  return db;
+  await ensureSchema();
+  return database();
 }
 const denied = () => Response.json({error:'관리 권한이 필요합니다.'},{status:403});
 export async function GET() {

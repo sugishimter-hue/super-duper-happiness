@@ -10,11 +10,10 @@
     {
       "binding": "DB",
       "database_name": "unipath-life-db",
-      // `npx wrangler d1 create unipath-life-db` 로 만든 뒤 출력되는 database_id 로 바꿔 주세요.
-      "database_id": "00000000-0000-4000-8000-000000000000",
+      // database_id 를 비워 두면 첫 배포 때 Cloudflare 가 이 이름으로 D1 을 자동으로 만듭니다.
       "migrations_dir": "drizzle"
     }
   ]
   // 비밀값(ADMIN_PASSWORD, SESSION_SECRET)은 이 파일에 쓰지 말고
-  // `npx wrangler secret put ADMIN_PASSWORD` 로 등록합니다.
+  // Cloudflare 대시보드 > Settings > Variables and Secrets 에 Secret 으로 등록합니다.
 }

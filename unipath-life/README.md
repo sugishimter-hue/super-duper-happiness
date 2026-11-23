@@ -24,81 +24,55 @@ ChatGPT 사이트(`unipath-life-connect.remugin.chatgpt.site`)에서 만든 v4�
 
 ---
 
-## 처음 배포하기 (한 번만)
+## 배포하기 — 클릭만으로 (명령어 필요 없음)
 
-준비물: [Cloudflare 계정](https://dash.cloudflare.com/sign-up)(무료), Node.js 22 이상
+데이터베이스(D1)는 첫 배포 때 자동으로 만들어지고, 표도 사이트가 처음 쓰일 때 자동으로 생깁니다.
 
-### 1. 설치하고 Cloudflare에 로그인
+### 1. GitHub 저장소 연결
 
-```bash
-cd unipath-life
-npm install
-npx wrangler login
+1. [dash.cloudflare.com](https://dash.cloudflare.com) 로그인 → 왼쪽 메뉴 **Workers & Pages** (또는 **Compute → Workers & Pages**)
+2. **Create** (애플리케이션 만들기) → **Import a repository** (Git 저장소 가져오기)
+3. GitHub 연결 → 저장소 `super-duper-happiness` 선택
+4. 설정 화면에서 이렇게 입력합니다.
+
+| 항목 | 값 |
+|---|---|
+| Project name | `unipath-life` |
+| Production branch | `claude/quirky-planck-gedxfe` (나중에 main 에 합치면 `main`) |
+| Root directory (Advanced settings 안) | `unipath-life` |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+
+5. **Deploy** 를 누르면 2~3분 뒤 `https://unipath-life.<계정이름>.workers.dev` 주소가 생깁니다.
+
+### 2. 관리자 비밀번호 등록
+
+배포된 `unipath-life` → **Settings → Variables and Secrets → Add** 에서 **Type: Secret** 으로 두 개를 추가합니다.
+
+| 이름 | 값 |
+|---|---|
+| `ADMIN_PASSWORD` | 관리자 화면 비밀번호 (8자 이상) |
+| `SESSION_SECRET` | 아무도 모르는 32자 이상 임의 문자열 (영문·숫자 마구 섞어서) |
+
+저장하면 바로 적용됩니다. 이제 `주소/admin` 에서 로그인할 수 있습니다.
+
+### 3. 기존 홈페이지에 연결
+
+배포 주소를 기존 홈페이지 메뉴나 버튼 링크로 넣으면 됩니다. 예시:
+
+```html
+<a href="https://unipath-life.<계정이름>.workers.dev" target="_blank" rel="noopener">노후·간병·연금 상담 신청</a>
 ```
 
-브라우저가 열리면 Cloudflare 계정으로 허용을 누르세요.
+이후 GitHub 에 코드를 올리면 자동으로 다시 배포됩니다.
 
-### 2. 데이터베이스(D1) 만들기
-
-```bash
-npx wrangler d1 create unipath-life-db
-```
-
-출력에 나오는 `database_id` 값을 복사해서 `wrangler.jsonc`의
-`"database_id": "00000000-0000-4000-8000-000000000000"` 자리에 붙여 넣습니다.
-
-### 3. 관리자 비밀번호 등록 (비밀값)
+### (선택) 명령어로 배포
 
 ```bash
-npx wrangler secret put ADMIN_PASSWORD
+cd unipath-life && npm install && npx wrangler login && npm run deploy
 ```
 
-관리자 화면에서 쓸 비밀번호를 입력합니다 (8자 이상).
-
-```bash
-npx wrangler secret put SESSION_SECRET
-```
-
-로그인 유지용 서명 키입니다. 아무도 모르는 32자 이상 임의 문자열을 넣으세요.
-아래 명령으로 만들어 복사하면 편합니다.
-
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-> 처음 배포 전이라 `secret put`이 Worker를 먼저 만들지 물어보면 **Yes**를 고르세요.
-
-### 4. 배포
-
-```bash
-npm run deploy
-```
-
-데이터베이스 표를 만들고(마이그레이션) → 빌드하고 → Cloudflare에 올립니다.
-끝나면 `https://unipath-life.<계정이름>.workers.dev` 주소가 나옵니다.
-
-### 5. 내 도메인 연결 (선택)
-
-Cloudflare 대시보드 → **Workers & Pages** → `unipath-life` → **Settings → Domains & Routes → Add → Custom domain**
-에서 `life.aijemu.ai.kr` 같은 주소를 넣으면 됩니다. (도메인 DNS가 Cloudflare에 등록되어 있어야 합니다.)
-
----
-
-## 수정 후 다시 배포
-
-```bash
-npm run deploy
-```
-
-### GitHub에 올리면 자동 배포되게 하기 (선택)
-
-Cloudflare 대시보드 → **Workers & Pages** → `unipath-life` → **Settings → Build → Connect** 에서 이 GitHub 저장소를 연결하고:
-
-- **Root directory**: `unipath-life`
-- **Build command**: `npm run build`
-- **Deploy command**: `npx wrangler deploy`
-
-데이터베이스 구조를 바꾼 경우(`drizzle/` 폴더에 SQL 추가)에는 한 번 `npm run db:migrate:remote`를 실행하세요.
+비밀번호는 `npx wrangler secret put ADMIN_PASSWORD`, `npx wrangler secret put SESSION_SECRET` 로 등록합니다.
 
 ---
 
@@ -106,7 +80,6 @@ Cloudflare 대시보드 → **Workers & Pages** → `unipath-life` → **Setting
 
 ```bash
 cp .env.example .dev.vars
-npm run db:migrate:local
 npm run dev
 ```
 
@@ -122,8 +95,8 @@ npm run dev
 | `app/api/admin` | 접수 조회·수정·삭제, 운영 설정 |
 | `app/api/auth` | 관리자 로그인·로그아웃 |
 | `lib/auth.ts` | 비밀번호 확인, 로그인 쿠키 |
-| `drizzle/*.sql` | 데이터베이스 표 만들기 |
-| `wrangler.jsonc` | Cloudflare 설정 (Worker 이름, D1 연결) |
+| `drizzle/*.sql` | 데이터베이스 표 구조 (사이트가 `lib/server.ts` 에서 자동으로 만듦) |
+| `wrangler.jsonc` | Cloudflare 설정 (Worker 이름, D1 자동 생성) |
 
 ## 공개 운영 전에 확인할 것
 
