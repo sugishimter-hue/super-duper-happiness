@@ -7,8 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "demo": "node server.js --demo",
-    "reset-password": "node server.js --reset-password",
-    "care": "node care/server.mjs"
+    "reset-password": "node server.js --reset-password"
   },
   "engines": {
     "node": ">=20.12"
