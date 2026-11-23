@@ -1,0 +1,11 @@
+// Cloudflare 배포 설정 — 체험판 웹사이트(docs/)를 Cloudflare Workers 정적 사이트로 올립니다.
+// README의 "☁️ Cloudflare에 배포" 참고
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ai-office-demo",
+  "compatibility_date": "2025-09-01",
+  "assets": {
+    "directory": "./docs",
+    "not_found_handling": "single-page-application"
+  }
+}

@@ -93,6 +93,39 @@ node office/build.mjs
 node demo/build.mjs && node demo/site.mjs
 ```
 
+## ☁️ Cloudflare에 배포 (체험판 웹사이트, 무료)
+
+같은 `docs/` 체험판을 Cloudflare에 올리면 `https://ai-office-demo.내계정.workers.dev` 주소가 생깁니다. 무료이고, 한국에서도 빠르게 열리며, 내 도메인(예: `demo.aijemu.ai.kr`)도 쉽게 붙일 수 있습니다. 배포 설정은 저장소의 `wrangler.jsonc`에 들어 있습니다.
+
+### 1) GitHub 저장소 연결 (처음 한 번, 약 5분)
+1. [dash.cloudflare.com](https://dash.cloudflare.com) 에 가입·로그인
+2. 왼쪽 메뉴 **Workers & Pages → 만들기(Create)** → **Import a repository** (Git 저장소 가져오기)
+3. **GitHub 연결** → `super-duper-happiness` 저장소 접근을 허용하고 선택
+4. 설정 화면에서 아래처럼 입력하고 **배포(Deploy)**
+   | 항목 | 값 |
+   |---|---|
+   | 프로젝트 이름 | `ai-office-demo` (wrangler.jsonc의 이름과 같게) |
+   | 프로덕션 브랜치 | `claude/amazing-fermat-wp3ycn` (나중에 main 으로 합치면 main) |
+   | 빌드 명령 | 비워 두기 |
+   | 배포 명령 | `npx wrangler deploy` |
+   | 루트 디렉터리 | `/` |
+5. 1~2분 뒤 **https://ai-office-demo.내계정.workers.dev** 주소가 열립니다.
+
+이후로는 이 브랜치에 새 코드가 올라갈 때마다 Cloudflare가 **자동으로 다시 배포**합니다.
+
+### 2) 공유 미리보기 주소 맞추기 (카톡·SNS 공유용)
+카톡에 링크를 붙였을 때 보이는 썸네일이 Cloudflare 주소를 가리키도록 다시 만듭니다.
+
+```bash
+node demo/build.mjs && SITE_URL=https://ai-office-demo.내계정.workers.dev/ node demo/site.mjs
+```
+
+### 3) 내 도메인 붙이기 (선택)
+- 도메인이 Cloudflare에 등록돼 있으면: 프로젝트 → **Settings → Domains & Routes → Add → Custom domain** 에 `demo.aijemu.ai.kr` 입력 → 끝
+- 그 뒤 2)의 `SITE_URL`도 새 주소로 바꿔 다시 만드세요.
+
+> 💡 Cloudflare에 올라가는 것은 **체험판(로그인 없는 공개 사이트)**입니다. 실제 사무실(서버판: 로그인·Claude API·Google·카카오톡·자동 브리핑)은 파일 저장소와 항상 켜진 서버가 필요해서 지금처럼 Render를 쓰세요.
+
 ## 체험판 (설치 없이 화면 미리 보기)
 
 `demo/` 폴더의 스크립트로 서버 없이 브라우저에서 바로 열리는 체험판 HTML을 만들 수 있습니다. 예시 업무와 예시 일정이 들어 있고, AI·Google·저장은 실제로 동작하지 않습니다.
@@ -251,6 +284,7 @@ src/kakao.js       카카오톡 "나에게 보내기" 알림
 src/slides.js      PPT·카드뉴스 파일 만들기 (pptxgenjs)
 demo/              설치 없는 체험판 만들기
 render.yaml        Render 인터넷 배포 설정
+wrangler.jsonc     Cloudflare 배포 설정 (체험판 docs/)
 public/manifest.webmanifest, icon-*.png   휴대폰 홈 화면 아이콘
 src/seed.js        기본 직원·대표 정보·지식창고 (여기서 직원 기본값 수정)
 src/store.js       JSON 파일 저장소
