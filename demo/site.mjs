@@ -1,11 +1,11 @@
-// 체험판을 일반 웹사이트로 만들기 (GitHub Pages용): node demo/site.mjs  →  docs/index.html
+// 체험판을 일반 웹사이트로 만들기 (Cloudflare·GitHub Pages용): node demo/site.mjs  →  docs/index.html
 // claude.ai 로그인 없이 누구나 열 수 있습니다. 먼저 node demo/build.mjs 로 체험판을 만든 뒤 실행하세요.
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SITE_URL = process.env.SITE_URL || 'https://sugishimter-hue.github.io/super-duper-happiness/';
+const SITE_URL = process.env.SITE_URL || 'https://ai-office-demo.rudtnr7754.workers.dev/';
 const demo = readFileSync(path.join(root, 'demo/ai-office-demo.html'), 'utf8');
 const title = '1인 창업자를 위한 AI 직원 사무실 · 체험판';
 const desc = 'AI 비서실장과 직원 6명이 업무를 나눠 맡고, 대표는 결재만 합니다. 설치·로그인 없이 바로 체험해 보세요.';

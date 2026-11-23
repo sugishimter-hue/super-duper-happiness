@@ -95,7 +95,7 @@ node demo/build.mjs && node demo/site.mjs
 
 ## ☁️ Cloudflare에 배포 (체험판 웹사이트, 무료)
 
-같은 `docs/` 체험판을 Cloudflare에 올리면 `https://ai-office-demo.내계정.workers.dev` 주소가 생깁니다. 무료이고, 한국에서도 빠르게 열리며, 내 도메인(예: `demo.aijemu.ai.kr`)도 쉽게 붙일 수 있습니다. 배포 설정은 저장소의 `wrangler.jsonc`에 들어 있습니다.
+같은 `docs/` 체험판을 Cloudflare에 올렸습니다. 주소: **https://ai-office-demo.rudtnr7754.workers.dev/** 무료이고, 한국에서도 빠르게 열리며, 내 도메인(예: `demo.aijemu.ai.kr`)도 쉽게 붙일 수 있습니다. 배포 설정은 저장소의 `wrangler.jsonc`에 들어 있습니다.
 
 ### 1) GitHub 저장소 연결 (처음 한 번, 약 5분)
 1. [dash.cloudflare.com](https://dash.cloudflare.com) 에 가입·로그인
@@ -114,11 +114,13 @@ node demo/build.mjs && node demo/site.mjs
 이후로는 이 브랜치에 새 코드가 올라갈 때마다 Cloudflare가 **자동으로 다시 배포**합니다.
 
 ### 2) 공유 미리보기 주소 맞추기 (카톡·SNS 공유용)
-카톡에 링크를 붙였을 때 보이는 썸네일이 Cloudflare 주소를 가리키도록 다시 만듭니다.
+카톡에 링크를 붙였을 때 보이는 썸네일은 이미 Cloudflare 주소로 맞춰 두었습니다. 체험판을 고친 뒤에는 아래처럼 다시 만들면 됩니다.
 
 ```bash
-node demo/build.mjs && SITE_URL=https://ai-office-demo.내계정.workers.dev/ node demo/site.mjs
+node demo/build.mjs && node demo/site.mjs
 ```
+
+GitHub Pages 주소로 만들고 싶을 때만 `SITE_URL=https://sugishimter-hue.github.io/super-duper-happiness/`를 앞에 붙이세요.
 
 ### 3) 내 도메인 붙이기 (선택)
 - 도메인이 Cloudflare에 등록돼 있으면: 프로젝트 → **Settings → Domains & Routes → Add → Custom domain** 에 `demo.aijemu.ai.kr` 입력 → 끝
